@@ -2,11 +2,14 @@ import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { googleCallbackApi, googleLoginApi } from '@/api/auth'
+import { useAuthStore } from '@/store/authStore'
 
 const GoogleCallback = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { error } = useAuth()
+  const { error, redirectByRole } = useAuth()
+  const { setAuth } = useAuthStore()
   const hasProcessed = useRef(false)
 
   useEffect(() => {
@@ -17,6 +20,10 @@ const GoogleCallback = () => {
 
       const code = searchParams.get('code')
       const errorParam = searchParams.get('error')
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+      const idToken = hashParams.get('id_token')
+      const state = hashParams.get('state') || searchParams.get('state')
+      const savedState = sessionStorage.getItem('google_oauth_state')
 
       console.log('[GoogleCallback] Processing callback')
       console.log('[GoogleCallback] Code:', code ? 'present' : 'missing')
@@ -29,31 +36,30 @@ const GoogleCallback = () => {
         return
       }
 
-      // Nếu không có code
-      if (!code) {
-        console.error('[GoogleCallback] No code received')
-        navigate('/login?error=no_code')
-        return
-      }
-
-      // Gọi API để xử lý code
       try {
-        const response = await fetch('/api/auth/google/callback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code })
-        })
+        if (idToken) {
+          if (!state || !savedState || state !== savedState) {
+            console.error('[GoogleCallback] Invalid state received')
+            navigate('/login?error=invalid_state')
+            return
+          }
 
-        if (!response.ok) {
-          console.error('[GoogleCallback] Login failed')
-          navigate('/login?error=login_failed')
+          sessionStorage.removeItem('google_oauth_state')
+          const data = await googleLoginApi(idToken)
+          setAuth(data.user, data.access_token)
+          redirectByRole(data.user)
           return
         }
 
-        const data = await response.json()
-        if (data.user) {
-          navigate('/dashboard')
+        if (!code) {
+          console.error('[GoogleCallback] No id_token/code received')
+          navigate('/login?error=no_token')
+          return
         }
+
+        const data = await googleCallbackApi(code)
+        setAuth(data.user, data.access_token)
+        redirectByRole(data.user)
       } catch (err) {
         console.error('[GoogleCallback] Error:', err)
         navigate('/login?error=unknown')
@@ -61,7 +67,7 @@ const GoogleCallback = () => {
     }
 
     processCallback()
-  }, [searchParams, navigate])
+  }, [searchParams, navigate, redirectByRole, setAuth])
 
   // Hiển thị loading hoặc error
   return (

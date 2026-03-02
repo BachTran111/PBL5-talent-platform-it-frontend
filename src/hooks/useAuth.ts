@@ -6,6 +6,7 @@ import type { User } from '@/@types/user'
 
 export const useAuth = () => {
   const navigate = useNavigate()
+  const googleAllowedOrigin = import.meta.env.VITE_GOOGLE_ALLOWED_ORIGIN || 'http://localhost:3000'
   const googleInitialized = useRef(false)
   const googleScriptLoading = useRef<Promise<void> | null>(null)
   const {
@@ -92,11 +93,21 @@ export const useAuth = () => {
     await googleScriptLoading.current
   }, [])
 
+  const ensureAllowedGoogleOrigin = useCallback(() => {
+    if (window.location.origin === googleAllowedOrigin) return true
+
+    const redirectUrl = `${googleAllowedOrigin}${window.location.pathname}${window.location.search}${window.location.hash}`
+    console.warn('[useAuth] Current origin is not allowed for Google Sign-In. Redirecting to:', redirectUrl)
+    window.location.href = redirectUrl
+    return false
+  }, [googleAllowedOrigin])
+
   // Initialize Google Sign-In and render button
   const initGoogleSignIn = useCallback(
     (buttonElementId: string) => {
       const initialize = async () => {
         try {
+          if (!ensureAllowedGoogleOrigin()) return
           await ensureGoogleScriptLoaded()
 
           if (!googleInitialized.current) {
@@ -115,29 +126,28 @@ export const useAuth = () => {
 
       void initialize()
     },
-    [ensureGoogleScriptLoaded, handleGoogleCredential]
+    [ensureAllowedGoogleOrigin, ensureGoogleScriptLoaded, handleGoogleCredential]
   )
 
   const handleGoogleLogin = useCallback(() => {
-    const loginWithPrompt = async () => {
-      console.log('[useAuth] handleGoogleLogin called')
+    console.log('[useAuth] handleGoogleLogin called')
 
-      try {
-        await ensureGoogleScriptLoaded()
+    const redirectUri = `${googleAllowedOrigin}/auth/google/callback`
+    const state = crypto.randomUUID()
+    sessionStorage.setItem('google_oauth_state', state)
 
-        if (!googleInitialized.current) {
-          initializeGoogleSignIn(handleGoogleCredential)
-          googleInitialized.current = true
-        }
+    const params = new URLSearchParams({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID as string,
+      redirect_uri: redirectUri,
+      response_type: 'id_token',
+      scope: 'openid email profile',
+      nonce: crypto.randomUUID(),
+      state,
+      prompt: 'select_account'
+    })
 
-        window.google?.accounts.id.prompt()
-      } catch (err) {
-        console.error('[useAuth] Google login init error:', err)
-      }
-    }
-
-    void loginWithPrompt()
-  }, [ensureGoogleScriptLoaded, handleGoogleCredential])
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+  }, [googleAllowedOrigin])
 
   const handleLogout = useCallback(async () => {
     console.log('[useAuth] handleLogout called')
