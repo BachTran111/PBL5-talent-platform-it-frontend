@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { ProtectedRoute } from './ProtectedRoute'
+import MainLayout from '@/components/layout/MainLayout'
 
 // Lazy load pages
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
@@ -24,14 +25,16 @@ export function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public Routes */}
-        <Route path='/login' element={<LoginPage />} />
-        <Route path='/register' element={<RegisterPage />} />
-        <Route path='/forgot-password' element={<ForgotPasswordPage />} />
-        <Route path='/auth/forgot-password' element={<ForgotPasswordPage />} />
-        <Route path='/reset-password' element={<ResetPasswordPage />} />
-        <Route path='/reset-password/:token' element={<ResetPasswordPage />} />
-        <Route path='/auth/reset-password' element={<ResetPasswordPage />} />
-        <Route path='/auth/reset-password/:token' element={<ResetPasswordPage />} />
+        <Route element={<MainLayout></MainLayout>}>
+          <Route path='/login' element={<LoginPage />} />
+          <Route path='/register' element={<RegisterPage />} />
+          <Route path='/forgot-password' element={<ForgotPasswordPage />} />
+          <Route path='/auth/forgot-password' element={<ForgotPasswordPage />} />
+          <Route path='/reset-password' element={<ResetPasswordPage />} />
+          <Route path='/reset-password/:token' element={<ResetPasswordPage />} />
+          <Route path='/auth/reset-password' element={<ResetPasswordPage />} />
+          <Route path='/auth/reset-password/:token' element={<ResetPasswordPage />} />
+        </Route>
 
         {/* Google OAuth Callback */}
         <Route path='/auth/google/callback' element={<GoogleCallback />} />
