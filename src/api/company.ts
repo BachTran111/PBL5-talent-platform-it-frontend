@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance'
-import type { GetCompaniesRequest, GetCompaniesResponse, Company } from '@/@types/company'
+import type { GetCompaniesRequest, GetCompaniesResponse, GetCompanyDetailResponse } from '@/@types/company'
 
 // get list companies
 export const getCompaniesApi = async (params: GetCompaniesRequest): Promise<GetCompaniesResponse> => {
@@ -22,7 +22,7 @@ export const getCompaniesApi = async (params: GetCompaniesRequest): Promise<GetC
 }
 
 // get company detail
-export const getCompanyDetailApi = async (id: number): Promise<Company> => {
-  const response = await axiosInstance.get<Company>(`/companies/${id}`)
-  return response.data
+export const getCompanyByIdApi = async (id: number): Promise<GetCompanyDetailResponse> => {
+  const res = await axiosInstance.get(`/companies/${id}`)
+  return res.data
 }

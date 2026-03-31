@@ -4,6 +4,7 @@ import { ProtectedRoute } from './ProtectedRoute'
 import MainLayout from '@/components/layout/MainLayout'
 import ChatPage from '@/pages/chatbot/ChatbotPage'
 import CompanyListPage from '@/pages/company/CompanyListPage'
+import CompanyDetailPage from '@/pages/company/CompanyDetailPage'
 
 // Lazy load pages
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
@@ -36,6 +37,8 @@ export function AppRoutes() {
           <Route path='/reset-password/:token' element={<ResetPasswordPage />} />
           <Route path='/auth/reset-password' element={<ResetPasswordPage />} />
           <Route path='/auth/reset-password/:token' element={<ResetPasswordPage />} />
+          <Route path='/companies' element={<CompanyListPage />} />
+          <Route path='/companies/:id' element={<CompanyDetailPage />} />
         </Route>
 
         {/* Chat Full Page - outside MainLayout */}
@@ -53,8 +56,6 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
-        <Route path='/companies' element={<CompanyListPage />} />
 
         {/* Employer Routes */}
         <Route

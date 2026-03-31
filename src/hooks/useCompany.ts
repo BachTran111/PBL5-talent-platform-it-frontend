@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useCompanyFilterStore } from '@/store/companyFilterStore'
-import { getCompaniesApi } from '@/api/company'
+import { getCompaniesApi, getCompanyByIdApi } from '@/api/company'
 
 export const useCompany = () => {
   const filters = useCompanyFilterStore()
@@ -20,4 +20,12 @@ export const useCompany = () => {
     // expose filters luôn (giống auth hook expose state)
     filters
   }
+}
+
+export const useCompanyDetail = (id: number) => {
+  return useQuery({
+    queryKey: ['company', id],
+    queryFn: () => getCompanyByIdApi(id),
+    enabled: !!id
+  })
 }
