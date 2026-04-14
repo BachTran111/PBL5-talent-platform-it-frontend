@@ -1,6 +1,8 @@
 import Header from './Header'
-import { Outlet, useLocation } from 'react-router-dom'
-import Footer from './Footer'
+
+import { Outlet } from 'react-router-dom'
+import AuthFooter from './AuthFooter'
+
 
 const MainLayout = () => {
   const location = useLocation()
@@ -12,6 +14,7 @@ const MainLayout = () => {
       <main className='flex-1'>
         <Outlet></Outlet>
       </main>
+      <AuthFooter></AuthFooter>
       {!isChatPage && <Footer></Footer>}
     </div>
   )

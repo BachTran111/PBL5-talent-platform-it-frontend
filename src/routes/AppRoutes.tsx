@@ -2,7 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { ProtectedRoute } from './ProtectedRoute'
 import MainLayout from '@/components/layout/MainLayout'
-
+import BrowseJobsPage from '@/pages/BrowseJobsPage'
+import HomePage from '@/pages/HomePage'
 import ChatbotPage from '@/pages/chatbot/ChatbotPage'
 import ChatPage from '@/pages/chat/ChatPage'
 
@@ -28,6 +29,8 @@ export function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public Routes */}
+        <Route path='/' element={<HomePage />} />
+        <Route path='/jobs' element={<BrowseJobsPage />} />
         <Route element={<MainLayout></MainLayout>}>
           <Route path='/login' element={<LoginPage />} />
           <Route path='/register' element={<RegisterPage />} />
@@ -67,8 +70,6 @@ export function AppRoutes() {
         <Route path='/auth/google/callback' element={<GoogleCallback />} />
         <Route path='/auth/:provider/callback' element={<SocialCallback />} />
 
-        {/* Default */}
-        <Route path='/' element={<Navigate to='/login' replace />} />
         <Route path='*' element={<Navigate to='/login' replace />} />
       </Routes>
     </Suspense>
