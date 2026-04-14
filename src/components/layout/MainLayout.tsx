@@ -1,8 +1,13 @@
 import Header from './Header'
+
 import { Outlet } from 'react-router-dom'
 import AuthFooter from './AuthFooter'
 
+
 const MainLayout = () => {
+  const location = useLocation()
+  const isChatPage = location.pathname.startsWith('/chat')
+
   return (
     <div className='flex min-h-screen flex-col'>
       <Header></Header>
@@ -10,6 +15,7 @@ const MainLayout = () => {
         <Outlet></Outlet>
       </main>
       <AuthFooter></AuthFooter>
+      {!isChatPage && <Footer></Footer>}
     </div>
   )
 }
