@@ -1,6 +1,6 @@
 import Header from './Header'
 import { Outlet } from 'react-router-dom'
-import Footer from './Footer'
+import AuthFooter from './AuthFooter'
 
 const MainLayout = () => {
   return (
@@ -9,7 +9,7 @@ const MainLayout = () => {
       <main className='flex-1'>
         <Outlet></Outlet>
       </main>
-      <Footer></Footer>
+      <AuthFooter></AuthFooter>
     </div>
   )
 }

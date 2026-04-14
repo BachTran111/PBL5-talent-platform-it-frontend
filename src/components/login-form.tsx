@@ -72,13 +72,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card className='overflow-hidden p-0'>
+      <Card className='overflow-hidden rounded-[30px] border border-slate-200/80 bg-white/95 p-0 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-sm'>
         <CardContent className='grid p-0 md:grid-cols-2'>
-          <form className='p-6 md:p-8' onSubmit={handleSubmit(onSubmit)}>
-            <FieldGroup>
+          <form className='bg-white p-6 md:p-8 lg:p-10' onSubmit={handleSubmit(onSubmit)}>
+            <FieldGroup className='gap-6'>
               <div className='flex flex-col items-center gap-2 text-center'>
-                <h1 className='text-2xl font-bold'>Welcome back</h1>
-                <p className='text-muted-foreground text-balance'>Login to your Acme Inc account</p>
+                <h1 className='text-3xl font-semibold tracking-[-0.04em] text-slate-950'>Welcome back</h1>
+                <p className='text-balance text-base text-slate-500'>Login to your ITJobVN account</p>
               </div>
 
               {/* Hiển thị lỗi từ API hoặc từ Google callback */}
@@ -95,7 +95,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                   type='email'
                   placeholder='m@example.com'
                   {...register('email')}
-                  className={cn(errors.email && 'border-destructive')}
+                  className={cn(
+                    'h-12 rounded-xl border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.03)] focus-visible:border-violet-400 focus-visible:ring-violet-200',
+                    errors.email && 'border-destructive'
+                  )}
                   disabled={isLoading}
                   required
                 />
@@ -107,7 +110,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                   <button
                     type='button'
                     onClick={() => navigate('/forgot-password')}
-                    className='ml-auto text-sm underline-offset-2 hover:underline text-primary'
+                    className='ml-auto text-sm text-violet-600 underline-offset-2 transition-colors hover:text-violet-700 hover:underline'
                   >
                     Forgot your password?
                   </button>
@@ -118,7 +121,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                     type={isShowPassword ? 'text' : 'password'}
                     placeholder='••••••••'
                     {...register('password')}
-                    className={cn(errors.password && 'border-destructive', 'pr-10')}
+                    className={cn(
+                      'h-12 rounded-xl border-slate-200 bg-white pr-10 shadow-[0_4px_18px_rgba(15,23,42,0.03)] focus-visible:border-violet-400 focus-visible:ring-violet-200',
+                      errors.password && 'border-destructive'
+                    )}
                     disabled={isLoading}
                   />
                   {/* Toggle show/hide password */}
@@ -140,15 +146,25 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                 {errors.password && <p className='text-sm text-destructive'>{errors.password.message}</p>}
               </Field>
               <Field>
-                <Button type='submit' disabled={isLoading}>
+                <Button
+                  type='submit'
+                  disabled={isLoading}
+                  className='h-11 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-[0_14px_36px_rgba(124,58,237,0.28)] hover:brightness-105'
+                >
                   Login
                 </Button>
               </Field>
-              <FieldSeparator className='*:data-[slot=field-separator-content]:bg-card'>
+              <FieldSeparator className='*:data-[slot=field-separator-content]:bg-white *:data-[slot=field-separator-content]:text-slate-500'>
                 Or continue with
               </FieldSeparator>
               <Field className='grid grid-cols-3 gap-4'>
-                <Button variant='outline' type='button' onClick={handleGithubLogin} disabled={isLoading}>
+                <Button
+                  variant='outline'
+                  type='button'
+                  onClick={handleGithubLogin}
+                  disabled={isLoading}
+                  className='h-11 rounded-xl border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.03)] hover:border-violet-200 hover:bg-violet-50'
+                >
                   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
                     <path
                       d='M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z'
@@ -157,7 +173,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                   </svg>
                   <span className='sr-only'>Login with GitHub</span>
                 </Button>
-                <Button variant='outline' type='button' onClick={handleGoogleLogin} disabled={isLoading}>
+                <Button
+                  variant='outline'
+                  type='button'
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                  className='h-11 rounded-xl border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.03)] hover:border-violet-200 hover:bg-violet-50'
+                >
                   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
                     <path
                       d='M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z'
@@ -166,7 +188,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                   </svg>
                   <span className='sr-only'>Login with Google</span>
                 </Button>
-                <Button variant='outline' type='button' onClick={handleFacebookLogin} disabled={isLoading}>
+                <Button
+                  variant='outline'
+                  type='button'
+                  onClick={handleFacebookLogin}
+                  disabled={isLoading}
+                  className='h-11 rounded-xl border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.03)] hover:border-violet-200 hover:bg-violet-50'
+                >
                   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
                     <path
                       d='M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z'
@@ -176,14 +204,16 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                   <span className='sr-only'>Login with Meta</span>
                 </Button>
               </Field>
-              <FieldDescription className='text-center'>
+              <FieldDescription className='text-center text-slate-500'>
                 Don&apos;t have an account? <a href='/register'>Sign up</a>
               </FieldDescription>
             </FieldGroup>
           </form>
-          <div className='relative hidden md:flex flex-col items-center justify-center p-8 bg-gradient-to-br from-violet-500 to-purple-600 text-white'>
-            {/* Logo icon */}
-            <div className='mb-8 p-6 bg-white/20 rounded-2xl backdrop-blur-sm'>
+          <div className='relative hidden overflow-hidden bg-gradient-to-br from-violet-600 via-violet-500 to-fuchsia-500 p-8 text-white md:flex md:flex-col md:items-center md:justify-center lg:p-10'>
+            <div className='absolute -left-8 top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl' />
+            <div className='absolute -right-10 bottom-0 h-52 w-52 rounded-full bg-fuchsia-300/20 blur-3xl' />
+
+            <div className='relative mb-8 rounded-[28px] bg-white/18 p-6 backdrop-blur-sm'>
               <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' className='w-16 h-16'>
                 <circle cx='12' cy='12' r='3' />
                 <circle cx='12' cy='4' r='2' />
@@ -200,18 +230,18 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                 <line x1='18' y1='12' x2='15' y2='12' stroke='currentColor' strokeWidth='1.5' />
               </svg>
             </div>
-            {/* Title */}
-            <h2 className='text-3xl font-bold text-center mb-4'>Launch your tech career in Vietnam.</h2>
-            {/* Description */}
-            <p className='text-center text-white/80 mb-8 max-w-xs'>
+            <h2 className='relative mb-4 text-center text-3xl font-semibold leading-tight tracking-[-0.04em]'>
+              Launch your tech career in Vietnam.
+            </h2>
+            <p className='relative mb-8 max-w-xs text-center text-lg leading-8 text-white/82'>
               Join 50,000+ developers finding their dream jobs at top-tier tech companies.
             </p>
-            <div className='flex gap-4'>
-              <div className='flex flex-col items-center px-6 py-4 bg-white/20 rounded-xl backdrop-blur-sm'>
+            <div className='relative flex gap-4'>
+              <div className='flex flex-col items-center rounded-2xl bg-white/16 px-6 py-5 backdrop-blur-sm'>
                 <Briefcase className='w-6 h-6 mb-2' />
                 <span className='text-sm font-semibold'>2,000+ Active Jobs</span>
               </div>
-              <div className='flex flex-col items-center px-6 py-4 bg-white/20 rounded-xl backdrop-blur-sm'>
+              <div className='flex flex-col items-center rounded-2xl bg-white/16 px-6 py-5 backdrop-blur-sm'>
                 <CheckCircle className='w-6 h-6 mb-2' />
                 <span className='text-sm font-semibold'>Verified Companies</span>
               </div>
@@ -219,7 +249,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
           </div>
         </CardContent>
       </Card>
-      <FieldDescription className='px-6 text-center'>
+      <FieldDescription className='px-6 text-center text-slate-500'>
         By clicking continue, you agree to our <a href='#'>Terms of Service</a> and <a href='#'>Privacy Policy</a>.
       </FieldDescription>
     </div>

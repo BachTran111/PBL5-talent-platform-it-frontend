@@ -1,32 +1,14 @@
 import { Menu, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { PrimaryButton } from '@/components/ui/Buttons'
 import Container from '@/components/ui/Container'
 import Logo from '@/components/ui/Logo'
 import { navigationItems } from '@/data/footer'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/store/authStore'
 
-const Header = () => {
-  const navigate = useNavigate()
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const { isAuthenticated, user } = useAuthStore()
-
-  const dashboardPath = useMemo(() => {
-    switch (user?.role) {
-      case 'ADMIN':
-        return '/admin'
-      case 'EMPLOYER':
-        return '/employer'
-      case 'SEEKER':
-        return '/seeker'
-      default:
-        return '/login'
-    }
-  }, [user?.role])
-
-  const closeMenu = () => setIsOpen(false)
 
   return (
     <header className='sticky top-0 z-50 border-b border-slate-200/80 bg-white/88 backdrop-blur-xl'>
@@ -47,23 +29,10 @@ const Header = () => {
           </nav>
 
           <div className='hidden items-center gap-3 lg:flex'>
-            {isAuthenticated ? (
-              <PrimaryButton className='rounded-xl px-5 py-2.5 text-sm' onClick={() => navigate(dashboardPath)}>
-                Dashboard
-              </PrimaryButton>
-            ) : (
-              <>
-                <Link
-                  to='/login'
-                  className='px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:text-violet-700'
-                >
-                  Login
-                </Link>
-                <PrimaryButton className='rounded-xl px-5 py-2.5 text-sm' onClick={() => navigate('/register')}>
-                  Sign Up
-                </PrimaryButton>
-              </>
-            )}
+            <Link to='/login' className='px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:text-violet-700'>
+              Login
+            </Link>
+            <PrimaryButton className='rounded-xl px-5 py-2.5 text-sm'>Sign Up</PrimaryButton>
           </div>
 
           <button
@@ -87,44 +56,21 @@ const Header = () => {
               <Link
                 key={item.label}
                 to={item.href}
-                onClick={closeMenu}
+                onClick={() => setIsOpen(false)}
                 className='block rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-violet-50 hover:text-violet-700'
               >
                 {item.label}
               </Link>
             ))}
-
             <div className='flex flex-col gap-2 pt-2'>
-              {isAuthenticated ? (
-                <PrimaryButton
-                  className='w-full rounded-2xl'
-                  onClick={() => {
-                    closeMenu()
-                    navigate(dashboardPath)
-                  }}
-                >
-                  Dashboard
-                </PrimaryButton>
-              ) : (
-                <>
-                  <Link
-                    to='/login'
-                    onClick={closeMenu}
-                    className='rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50'
-                  >
-                    Login
-                  </Link>
-                  <PrimaryButton
-                    className='w-full rounded-2xl'
-                    onClick={() => {
-                      closeMenu()
-                      navigate('/register')
-                    }}
-                  >
-                    Sign Up
-                  </PrimaryButton>
-                </>
-              )}
+              <Link
+                to='/login'
+                onClick={() => setIsOpen(false)}
+                className='rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50'
+              >
+                Login
+              </Link>
+              <PrimaryButton className='w-full rounded-2xl'>Sign Up</PrimaryButton>
             </div>
           </div>
         </div>
@@ -133,4 +79,4 @@ const Header = () => {
   )
 }
 
-export default Header
+export default Navbar

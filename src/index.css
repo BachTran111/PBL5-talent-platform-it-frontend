@@ -7,18 +7,18 @@
 :root {
   --radius: 0.5rem;
   --background: #ffffff;
-  --foreground: #1f2937;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #1f2937;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #1f2937;
-  --primary: #8b5cf6;
+  --popover-foreground: #0f172a;
+  --primary: #7c3aed;
   --primary-foreground: #ffffff;
-  --secondary: #ede9fe;
+  --secondary: #f5f3ff;
   --secondary-foreground: #6d28d9;
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
-  --accent: #ede9fe;
+  --muted: #f8f8fc;
+  --muted-foreground: #64748b;
+  --accent: #f5f3ff;
   --accent-foreground: #6d28d9;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
@@ -94,8 +94,21 @@
   body {
     @apply bg-background text-foreground;
     font-family:
-      system-ui,
-      -apple-system,
+      'Plus Jakarta Sans',
+      'Inter',
+      'Segoe UI',
       sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input {
+    font: inherit;
   }
 }
