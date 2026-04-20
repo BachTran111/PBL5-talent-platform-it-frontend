@@ -44,9 +44,9 @@ const HeaderSection = ({ total, visibleCount }: { total: number; visibleCount: n
           </p>
         </div>
 
-        <div className='grid gap-3 sm:grid-cols-2'>
+        <div className='grid gap-3 sm:grid-cols-1'>
           <MetricCard icon={<Building2 className='h-5 w-5' />} label='Tổng công ty' value={total} />
-          <MetricCard icon={<LayoutGrid className='h-5 w-5' />} label='Đang hiển thị' value={visibleCount} />
+          {/* <MetricCard icon={<LayoutGrid className='h-5 w-5' />} label='Đang hiển thị' value={visibleCount} /> */}
         </div>
       </div>
     </section>

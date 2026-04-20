@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card'
 import { useFollow } from '@/hooks/useFollow'
 import type { CompanyJobSummary } from '@/types/job-detail'
 import axios from 'axios'
-import { ArrowUpRight, BriefcaseBusiness, Building2, MapPin, Users } from 'lucide-react'
+import { ArrowUpRight, BriefcaseBusiness, Building2, MapPin, Star, Users } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -14,10 +14,11 @@ type Props = {
 
 export const CompanyCard = ({ company }: Props) => {
   const navigate = useNavigate()
-  const { followerCount } = useFollow(company.company_id)
+  const { followerCount, isFollowed } = useFollow(company.company_id)
   const [jobs, setJobs] = useState<CompanyJobSummary[]>([])
   const [showMoreJobs, setShowMoreJobs] = useState(false)
   const [isJobsLoading, setIsJobsLoading] = useState(false)
+  const visibleJobs = showMoreJobs ? jobs.slice(0, 4) : jobs.slice(0, 2)
 
   const skills = useMemo(
     () =>
@@ -42,7 +43,7 @@ export const CompanyCard = ({ company }: Props) => {
       company.company_id,
       {
         page: 1,
-        limit: showMoreJobs ? 4 : 2,
+        limit: 6,
         active: true
       },
       controller.signal
@@ -74,7 +75,12 @@ export const CompanyCard = ({ company }: Props) => {
     >
       <div className='flex flex-col gap-6 lg:flex-row'>
         <div className='flex shrink-0 justify-center lg:block'>
-          <div className='flex h-28 w-28 items-center justify-center overflow-hidden rounded-[26px] border border-violet-100 bg-gradient-to-br from-violet-100 via-fuchsia-50 to-white shadow-[0_16px_36px_rgba(124,58,237,0.12)] sm:h-32 sm:w-32'>
+          <div className='relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-[26px] border border-violet-100 bg-gradient-to-br from-violet-100 via-fuchsia-50 to-white shadow-[0_16px_36px_rgba(124,58,237,0.12)] sm:h-32 sm:w-32'>
+            {isFollowed ? (
+              <div className='absolute left-0 top-0 z-10 flex h-11 w-11 items-center justify-center rounded-br-[18px] rounded-tl-[20px] bg-amber-400 text-white shadow-[0_10px_24px_rgba(251,191,36,0.35)]'>
+                <Star className='h-5 w-5 fill-current' />
+              </div>
+            ) : null}
             <img src={company.company_image} alt={company.company_name} className='h-full w-full object-cover' />
           </div>
         </div>
@@ -166,24 +172,24 @@ export const CompanyCard = ({ company }: Props) => {
                 </div>
               ) : jobs.length > 0 ? (
                 <div className='space-y-2.5'>
-                  {jobs.map((job) => (
-                    <p key={job.id} className='line-clamp-1 text-sm font-medium text-slate-700 transition group-hover:text-slate-900'>
+                  {visibleJobs.map((job) => (
+                    <p key={job.id} className='line-clamp-1 text-sm font-medium text-slate-700'>
                       {job.title}
                     </p>
                   ))}
 
-                  {!showMoreJobs ? (
+                  {jobs.length > 2 && (
                     <button
                       type='button'
                       onClick={(e) => {
                         e.stopPropagation()
-                        setShowMoreJobs(true)
+                        setShowMoreJobs((prev) => !prev)
                       }}
                       className='pt-1 text-sm font-semibold text-violet-700 transition hover:text-violet-800 hover:underline'
                     >
-                      Xem thêm
+                      {showMoreJobs ? 'Thu gọn' : 'Xem thêm'}
                     </button>
-                  ) : null}
+                  )}
                 </div>
               ) : (
                 <p className='text-sm text-slate-500'>Chưa có công việc đang tuyển.</p>
