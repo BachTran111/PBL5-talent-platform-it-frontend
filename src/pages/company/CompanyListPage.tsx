@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Building2, LayoutGrid, Sparkles } from 'lucide-react'
+import { Building2, Sparkles } from 'lucide-react'
 import { CompanyFilters } from '@/components/company/CompanyFilters'
 import { CompanyList } from '@/components/company/CompanyList'
 import { CompanyPagination } from '@/components/company/CompanyPagination'
@@ -25,7 +25,7 @@ export default function CompanyListPage() {
   )
 }
 
-const HeaderSection = ({ total, visibleCount }: { total: number; visibleCount: number }) => {
+const HeaderSection = ({ total }: { total: number; visibleCount: number }) => {
   return (
     <section className='rounded-[32px] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8'>
       <div className='flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between'>
