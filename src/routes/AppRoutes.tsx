@@ -4,6 +4,7 @@ import { ProtectedRoute } from './ProtectedRoute'
 import MainLayout from '@/components/layout/MainLayout'
 import BrowseJobsPage from '@/pages/BrowseJobsPage'
 import HomePage from '@/pages/HomePage'
+import JobDetailPage from '@/pages/JobDetailPage'
 import ChatbotPage from '@/pages/chatbot/ChatbotPage'
 import ChatPage from '@/pages/chat/ChatPage'
 import EmployerOverviewPage from '@/pages/employer/OverviewPage'
@@ -35,10 +36,10 @@ export function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public Routes */}
-
         <Route element={<MainLayout></MainLayout>}>
           <Route path='/' element={<HomePage />} />
           <Route path='/jobs' element={<BrowseJobsPage />} />
+          <Route path='/jobs/:id' element={<JobDetailPage />} />
           <Route path='/login' element={<LoginPage />} />
           <Route path='/register' element={<RegisterPage />} />
           <Route path='/forgot-password' element={<ForgotPasswordPage />} />
