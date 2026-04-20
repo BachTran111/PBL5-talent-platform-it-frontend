@@ -5,6 +5,16 @@ import MainLayout from '@/components/layout/MainLayout'
 import ChatPage from '@/pages/chatbot/ChatbotPage'
 import CompanyListPage from '@/pages/company/CompanyListPage'
 import CompanyDetailPage from '@/pages/company/CompanyDetailPage'
+import BrowseJobsPage from '@/pages/BrowseJobsPage'
+import HomePage from '@/pages/HomePage'
+import JobDetailPage from '@/pages/JobDetailPage'
+import ChatbotPage from '@/pages/chatbot/ChatbotPage'
+import EmployerOverviewPage from '@/pages/employer/OverviewPage'
+import EmployerJobsPage from '@/pages/employer/JobsPage'
+import EmployerCandidatesPage from '@/pages/employer/CandidatesPage'
+import EmployerInterviewsPage from '@/pages/employer/InterviewsPage'
+import CreateJobPage from '@/pages/employer/CreateJobPage'
+import CreateInterviewPage from '@/pages/employer/CreateInterviewPage'
 
 // Lazy load pages
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
@@ -29,6 +39,9 @@ export function AppRoutes() {
       <Routes>
         {/* Public Routes */}
         <Route element={<MainLayout></MainLayout>}>
+          <Route path='/' element={<HomePage />} />
+          <Route path='/jobs' element={<BrowseJobsPage />} />
+          <Route path='/jobs/:id' element={<JobDetailPage />} />
           <Route path='/login' element={<LoginPage />} />
           <Route path='/register' element={<RegisterPage />} />
           <Route path='/forgot-password' element={<ForgotPasswordPage />} />
@@ -39,36 +52,43 @@ export function AppRoutes() {
           <Route path='/auth/reset-password/:token' element={<ResetPasswordPage />} />
           <Route path='/companies' element={<CompanyListPage />} />
           <Route path='/companies/:id' element={<CompanyDetailPage />} />
+          <Route path='/chat' element={<ChatPage></ChatPage>}></Route>
+
+          {/* Candidate/Seeker Routes */}
+          <Route
+            path='/seeker/*'
+            element={
+              <ProtectedRoute allowedRoles={['SEEKER']}>
+                <SeekerDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Employer Routes */}
+          <Route
+            path='/employer'
+            element={
+              <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+                <EmployerDashboard />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<EmployerOverviewPage />} />
+            <Route path='jobs' element={<EmployerJobsPage />} />
+            <Route path='jobs/create' element={<CreateJobPage />} />
+            <Route path='candidates' element={<EmployerCandidatesPage />} />
+            <Route path='interviews' element={<EmployerInterviewsPage />} />
+            <Route path='interviews/create' element={<CreateInterviewPage />} />
+          </Route>
         </Route>
 
         {/* Chat Full Page - outside MainLayout */}
-        <Route path='/chatbot' element={<ChatPage />} />
+        <Route path='/chatbot' element={<ChatbotPage />} />
 
         {/* Google OAuth Callback */}
         <Route path='/auth/google/callback' element={<GoogleCallback />} />
         <Route path='/auth/:provider/callback' element={<SocialCallback />} />
-        {/* Candidate/Seeker Routes */}
-        <Route
-          path='/seeker/*'
-          element={
-            <ProtectedRoute allowedRoles={['SEEKER']}>
-              <SeekerDashboard />
-            </ProtectedRoute>
-          }
-        />
 
-        {/* Employer Routes */}
-        <Route
-          path='/employer/*'
-          element={
-            <ProtectedRoute allowedRoles={['EMPLOYER']}>
-              <EmployerDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Default */}
-        <Route path='/' element={<Navigate to='/login' replace />} />
         <Route path='*' element={<Navigate to='/login' replace />} />
       </Routes>
     </Suspense>
