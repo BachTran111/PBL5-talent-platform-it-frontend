@@ -46,7 +46,7 @@ const GoogleCallback = () => {
 
           sessionStorage.removeItem('google_oauth_state')
           const data = await googleLoginApi(idToken)
-          setAuth(data.user, data.access_token)
+          setAuth(data.user, data.access_token, data.refresh_token)
           redirectByRole(data.user)
           return
         }
@@ -58,7 +58,7 @@ const GoogleCallback = () => {
         }
 
         const data = await googleCallbackApi(code)
-        setAuth(data.user, data.access_token)
+        setAuth(data.user, data.access_token, data.refresh_token)
         redirectByRole(data.user)
       } catch (err) {
         console.error('[GoogleCallback] Error:', err)

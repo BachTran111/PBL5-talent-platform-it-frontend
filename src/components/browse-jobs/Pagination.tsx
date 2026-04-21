@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 type PaginationProps = {
@@ -9,6 +10,7 @@ type PaginationProps = {
 }
 
 const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+  const { t } = useTranslation()
   const pages = useMemo(() => {
     if (totalPages <= 4) {
       return Array.from({ length: totalPages }, (_, index) => index + 1)
@@ -29,6 +31,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
     <div className='flex flex-wrap items-center justify-center gap-2.5 rounded-[24px] border border-slate-200/80 bg-white/80 p-3.5 shadow-[0_14px_34px_rgba(15,23,42,0.04)] backdrop-blur-sm'>
       <button
         type='button'
+        aria-label={t('browseJobs.pagination.previous')}
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         className='flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition hover:border-violet-200 hover:text-violet-700'
       >
@@ -69,6 +72,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
 
       <button
         type='button'
+        aria-label={t('browseJobs.pagination.next')}
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         className='flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition hover:border-violet-200 hover:text-violet-700'
       >

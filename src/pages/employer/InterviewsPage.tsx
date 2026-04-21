@@ -1,4 +1,5 @@
 import { Plus, Download } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -9,21 +10,37 @@ import EmployerEmptyState from '@/components/employer/EmployerEmptyState'
 import { useEmployerInterviews } from '@/hooks/useEmployerData'
 
 const InterviewsPage = () => {
+  const { i18n, t } = useTranslation()
   const { data, isLoading, error } = useEmployerInterviews()
+  const locale = i18n.language.startsWith('vi') ? 'vi-VN' : 'en-US'
+
+  const getStatusLabel = (status?: string | null) => {
+    if (!status) return '-'
+
+    return t(`employer.statuses.${status}`, { defaultValue: status })
+  }
 
   const handleExport = () => {
     if (!data?.interviews) return
 
     const csv = [
-      ['Candidate', 'Job Title', 'Date', 'Time', 'Interview Type', 'Location', 'Status'],
+      [
+        t('employer.interviews.table.candidate'),
+        t('employer.interviews.table.jobTitle'),
+        t('employer.interviews.table.date'),
+        t('employer.interviews.table.time'),
+        t('employer.interviews.table.interviewType'),
+        t('employer.interviews.table.location'),
+        t('employer.interviews.table.status')
+      ],
       ...data.interviews.map((interview) => [
         interview.candidate.fullName,
         interview.job.title,
-        interview.interviewDate ? new Date(interview.interviewDate).toLocaleDateString('en-US') : '-',
+        interview.interviewDate ? new Date(interview.interviewDate).toLocaleDateString(locale) : '-',
         interview.startTime || '-',
         interview.interviewType || '-',
         interview.location || '-',
-        interview.status
+        getStatusLabel(interview.status)
       ])
     ]
       .map((row) => row.map((cell) => `"${cell}"`).join(','))
@@ -41,41 +58,41 @@ const InterviewsPage = () => {
   }
 
   const actionButtons = (
-    <div className='flex items-center gap-3'>
-      <Button variant='outline' size='sm' onClick={handleExport} className='rounded-lg'>
+    <div className='flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center'>
+      <Button variant='outline' size='sm' onClick={handleExport} className='w-full rounded-lg sm:w-auto'>
         <Download className='h-4 w-4' />
-        Export
+        {t('employer.actions.export')}
       </Button>
-      <Link to='/employer/interviews/create'>
-        <Button size='sm' className='rounded-lg'>
+      <Link to='/employer/interviews/create' className='w-full sm:w-auto'>
+        <Button size='sm' className='w-full rounded-lg sm:w-auto'>
           <Plus className='h-4 w-4' />
-          Add Schedule
+          {t('employer.interviews.page.addSchedule')}
         </Button>
       </Link>
     </div>
   )
 
   return (
-    <div className='space-y-6'>
+    <div className='min-w-0 space-y-6'>
       <EmployerPageHeader
-        eyebrow='Interview schedule'
-        title='Interview Schedule'
-        description='Company interview schedules including candidate, round, and interviewer.'
+        eyebrow={t('employer.interviews.page.eyebrow')}
+        title={t('employer.interviews.page.title')}
+        description={t('employer.interviews.page.description')}
       />
 
       <EmployerSectionCard
-        title={`All Interview Schedules${data ? ` • ${data.total}` : ''}`}
-        description='Data sourced from InterviewSchedule via employer endpoint.'
+        title={`${t('employer.interviews.page.sectionTitle')}${data ? ` - ${data.total}` : ''}`}
+        description={t('employer.interviews.page.sectionDescription')}
         action={actionButtons}
         contentClassName='space-y-4'
       >
         {isLoading ? (
           <EmployerEmptyState
-            title='Loading interview schedules'
-            description='System is syncing the latest interview schedules.'
+            title={t('employer.interviews.page.loadingTitle')}
+            description={t('employer.interviews.page.loadingDescription')}
           />
         ) : null}
-        {error ? <EmployerEmptyState title='Failed to load interview schedules' description={error} /> : null}
+        {error ? <EmployerEmptyState title={t('employer.interviews.page.failedTitle')} description={error} /> : null}
         {data ? <EmployerInterviewList interviews={data.interviews} /> : null}
       </EmployerSectionCard>
     </div>

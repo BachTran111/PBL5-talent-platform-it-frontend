@@ -1,15 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Calendar, Clock, MapPin, Users } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { createEmployerInterviewApi, getEmployerCandidatesApi } from '@/api/employer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import type { EmployerCandidateItem } from '@/@types/employer'
 
 type FormData = {
-  candidateId: string
-  jobId: string
+  applicationId: string
   interviewDate: string
   startTime: string
   endTime: string
-  interviewType: 'Online' | 'Offline'
+  interviewType: 'Online' | 'Offline' | 'Phone'
   location: string
   meetingLink: string
   notes: string
@@ -19,10 +21,20 @@ type CreateInterviewScheduleFormProps = {
   onClose?: () => void
 }
 
+const getDuration = (date: string, startTime: string, endTime: string) => {
+  const start = new Date(`${date}T${startTime}`)
+  const end = new Date(`${date}T${endTime}`)
+  const diffMinutes = Math.round((end.getTime() - start.getTime()) / 60000)
+
+  return Number.isFinite(diffMinutes) && diffMinutes > 0 ? diffMinutes : 60
+}
+
 const CreateInterviewScheduleForm = ({ onClose }: CreateInterviewScheduleFormProps) => {
+  const { t } = useTranslation()
+  const [candidates, setCandidates] = useState<EmployerCandidateItem[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [formData, setFormData] = useState<FormData>({
-    candidateId: '',
-    jobId: '',
+    applicationId: '',
     interviewDate: '',
     startTime: '',
     endTime: '',
@@ -35,18 +47,44 @@ const CreateInterviewScheduleForm = ({ onClose }: CreateInterviewScheduleFormPro
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  useEffect(() => {
+    let isMounted = true
+
+    const loadCandidates = async () => {
+      try {
+        const response = await getEmployerCandidatesApi(1, 100)
+        if (!isMounted) return
+        setCandidates(response.candidates)
+      } catch {
+        if (isMounted) {
+          setLoadError(t('employer.interviews.create.loadError'))
+        }
+      }
+    }
+
+    void loadCandidates()
+
+    return () => {
+      isMounted = false
+    }
+  }, [t])
+
+  const selectedCandidate = useMemo(
+    () => candidates.find((candidate) => String(candidate.applicationId) === formData.applicationId) ?? null,
+    [candidates, formData.applicationId]
+  )
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
-    if (!formData.candidateId) newErrors.candidateId = 'Please select a candidate'
-    if (!formData.jobId) newErrors.jobId = 'Please select a job position'
-    if (!formData.interviewDate) newErrors.interviewDate = 'Please select an interview date'
-    if (!formData.startTime) newErrors.startTime = 'Please enter start time'
-    if (!formData.endTime) newErrors.endTime = 'Please enter end time'
+    if (!formData.applicationId) newErrors.applicationId = t('employer.interviews.create.validation.candidate')
+    if (!formData.interviewDate) newErrors.interviewDate = t('employer.interviews.create.validation.date')
+    if (!formData.startTime) newErrors.startTime = t('employer.interviews.create.validation.startTime')
+    if (!formData.endTime) newErrors.endTime = t('employer.interviews.create.validation.endTime')
     if (formData.interviewType === 'Online' && !formData.meetingLink) {
-      newErrors.meetingLink = 'Please provide a meeting link for online interview'
+      newErrors.meetingLink = t('employer.interviews.create.validation.meetingLink')
     }
     if (formData.interviewType === 'Offline' && !formData.location) {
-      newErrors.location = 'Please provide a location for offline interview'
+      newErrors.location = t('employer.interviews.create.validation.location')
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -71,84 +109,68 @@ const CreateInterviewScheduleForm = ({ onClose }: CreateInterviewScheduleFormPro
     if (!validateForm()) return
 
     setIsSubmitting(true)
+    setLoadError(null)
+
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      console.log('Interview schedule created:', formData)
-      if (onClose) onClose()
+      await createEmployerInterviewApi({
+        applicationId: Number(formData.applicationId),
+        type: formData.interviewType === 'Online' ? 'video' : formData.interviewType === 'Phone' ? 'phone' : 'onsite',
+        schedule: new Date(`${formData.interviewDate}T${formData.startTime}`).toISOString(),
+        link: formData.interviewType === 'Online' ? formData.meetingLink : formData.location || undefined,
+        duration: getDuration(formData.interviewDate, formData.startTime, formData.endTime)
+      })
+
+      onClose?.()
     } catch (error) {
-      console.error('Failed to create interview schedule:', error)
+      const message =
+        error && typeof error === 'object' && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null
+      setLoadError(message || t('employer.interviews.create.submitError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Mock data for dropdowns
-  const candidates = [
-    { id: '1', name: 'Ngo Quoc An' },
-    { id: '2', name: 'Pham Gia Huy' },
-    { id: '3', name: 'Tran Minh Duc' },
-    { id: '4', name: 'Vu Thanh Hoa' }
-  ]
-
-  const jobs = [
-    { id: '1', title: 'Backend Engineer (Node.js)' },
-    { id: '2', title: 'Senior Product Designer' },
-    { id: '3', title: 'QA Automation Engineer' }
-  ]
-
   return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
-      {/* Section 1: Select Candidate & Job */}
-      <div className='space-y-4'>
-        <h3 className='text-sm font-semibold text-slate-950'>Select Candidate & Position</h3>
-        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-          <div>
-            <label className='block text-sm font-medium text-slate-700 mb-2'>Candidate *</label>
+    <form onSubmit={handleSubmit} className='min-w-0 space-y-6'>
+      {loadError ? <p className='break-words rounded-lg border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200'>{loadError}</p> : null}
+
+      <div className='min-w-0 space-y-4'>
+        <h3 className='text-sm font-semibold text-slate-950 dark:text-white'>{t('employer.interviews.create.selectCandidateTitle')}</h3>
+        <div className='grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2'>
+          <div className='min-w-0'>
+            <label className='mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300'>{t('employer.interviews.create.candidate')}</label>
             <select
-              name='candidateId'
-              value={formData.candidateId}
+              name='applicationId'
+              value={formData.applicationId}
               onChange={handleChange}
-              className='w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition'
+              className='w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-white/8 dark:bg-white/5 dark:text-slate-100'
             >
-              <option value=''>Choose candidate...</option>
-              {candidates.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
+              <option value=''>{t('employer.interviews.create.chooseCandidate')}</option>
+              {candidates.map((candidate) => (
+                <option key={candidate.applicationId} value={candidate.applicationId}>
+                  {candidate.seeker.fullName || candidate.seeker.email || t('employer.interviews.table.candidate')} - {candidate.job.title}
                 </option>
               ))}
             </select>
-            {errors.candidateId && <p className='text-xs text-red-500 mt-1'>{errors.candidateId}</p>}
+            {errors.applicationId && <p className='mt-1 text-xs text-red-500'>{errors.applicationId}</p>}
           </div>
-          <div>
-            <label className='block text-sm font-medium text-slate-700 mb-2'>Job Position *</label>
-            <select
-              name='jobId'
-              value={formData.jobId}
-              onChange={handleChange}
-              className='w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition'
-            >
-              <option value=''>Choose position...</option>
-              {jobs.map((j) => (
-                <option key={j.id} value={j.id}>
-                  {j.title}
-                </option>
-              ))}
-            </select>
-            {errors.jobId && <p className='text-xs text-red-500 mt-1'>{errors.jobId}</p>}
+          <div className='min-w-0'>
+            <label className='mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300'>{t('employer.interviews.create.jobPosition')}</label>
+            <Input value={selectedCandidate?.job.title ?? ''} readOnly className='rounded-lg bg-slate-50 dark:bg-white/5' />
           </div>
         </div>
       </div>
 
-      {/* Section 2: Date & Time */}
-      <div className='space-y-4 pb-4 border-b border-slate-200'>
+      <div className='space-y-4 border-b border-slate-200 pb-4 dark:border-white/8'>
         <div className='flex items-center gap-2'>
-          <Calendar className='h-5 w-5 text-slate-600' />
-          <h3 className='text-sm font-semibold text-slate-950'>Interview Schedule</h3>
+          <Calendar className='h-5 w-5 text-slate-600 dark:text-slate-400' />
+          <h3 className='text-sm font-semibold text-slate-950 dark:text-white'>{t('employer.interviews.create.scheduleTitle')}</h3>
         </div>
-        <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+        <div className='grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3'>
           <div>
-            <label className='block text-sm font-medium text-slate-700 mb-2'>Interview Date *</label>
+            <label className='mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300'>{t('employer.interviews.create.interviewDate')}</label>
             <Input
               type='date'
               name='interviewDate'
@@ -157,10 +179,10 @@ const CreateInterviewScheduleForm = ({ onClose }: CreateInterviewScheduleFormPro
               min={new Date().toISOString().split('T')[0]}
               className='rounded-lg'
             />
-            {errors.interviewDate && <p className='text-xs text-red-500 mt-1'>{errors.interviewDate}</p>}
+            {errors.interviewDate && <p className='mt-1 text-xs text-red-500'>{errors.interviewDate}</p>}
           </div>
           <div>
-            <label className='block text-sm font-medium text-slate-700 mb-2'>Start Time *</label>
+            <label className='mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300'>{t('employer.interviews.create.startTime')}</label>
             <Input
               type='time'
               name='startTime'
@@ -168,117 +190,94 @@ const CreateInterviewScheduleForm = ({ onClose }: CreateInterviewScheduleFormPro
               onChange={handleChange}
               className='rounded-lg'
             />
-            {errors.startTime && <p className='text-xs text-red-500 mt-1'>{errors.startTime}</p>}
+            {errors.startTime && <p className='mt-1 text-xs text-red-500'>{errors.startTime}</p>}
           </div>
           <div>
-            <label className='block text-sm font-medium text-slate-700 mb-2'>End Time *</label>
+            <label className='mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300'>{t('employer.interviews.create.endTime')}</label>
             <Input type='time' name='endTime' value={formData.endTime} onChange={handleChange} className='rounded-lg' />
-            {errors.endTime && <p className='text-xs text-red-500 mt-1'>{errors.endTime}</p>}
+            {errors.endTime && <p className='mt-1 text-xs text-red-500'>{errors.endTime}</p>}
           </div>
         </div>
       </div>
 
-      {/* Section 3: Interview Type */}
-      <div className='space-y-4 pb-4 border-b border-slate-200'>
+      <div className='space-y-4 border-b border-slate-200 pb-4 dark:border-white/8'>
         <div className='flex items-center gap-2'>
-          <Users className='h-5 w-5 text-slate-600' />
-          <h3 className='text-sm font-semibold text-slate-950'>Interview Method</h3>
+          <Users className='h-5 w-5 text-slate-600 dark:text-slate-400' />
+          <h3 className='text-sm font-semibold text-slate-950 dark:text-white'>{t('employer.interviews.create.methodTitle')}</h3>
         </div>
-        <div className='flex items-center gap-4'>
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='radio'
-              name='interviewType'
-              value='Online'
-              checked={formData.interviewType === 'Online'}
-              onChange={handleChange}
-              className='h-4 w-4 cursor-pointer'
-            />
-            <span className='text-sm font-medium text-slate-700'>Online Meeting</span>
-          </label>
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='radio'
-              name='interviewType'
-              value='Offline'
-              checked={formData.interviewType === 'Offline'}
-              onChange={handleChange}
-              className='h-4 w-4 cursor-pointer'
-            />
-            <span className='text-sm font-medium text-slate-700'>In-Person Meeting</span>
-          </label>
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4'>
+          {(['Online', 'Offline', 'Phone'] as const).map((type) => (
+            <label key={type} className='flex cursor-pointer items-center gap-2'>
+              <input
+                type='radio'
+                name='interviewType'
+                value={type}
+                checked={formData.interviewType === type}
+                onChange={handleChange}
+                className='h-4 w-4 cursor-pointer'
+              />
+              <span className='text-sm font-medium text-slate-700 dark:text-slate-300'>{t(`employer.interviews.create.types.${type}`)}</span>
+            </label>
+          ))}
         </div>
       </div>
 
-      {/* Section 4: Location or Meeting Link */}
-      <div className='space-y-4 pb-4 border-b border-slate-200'>
+      <div className='space-y-4 border-b border-slate-200 pb-4 dark:border-white/8'>
         <div className='flex items-center gap-2'>
-          <MapPin className='h-5 w-5 text-slate-600' />
-          <h3 className='text-sm font-semibold text-slate-950'>Interview Location</h3>
+          <MapPin className='h-5 w-5 text-slate-600 dark:text-slate-400' />
+          <h3 className='text-sm font-semibold text-slate-950 dark:text-white'>{t('employer.interviews.create.locationTitle')}</h3>
         </div>
 
         {formData.interviewType === 'Online' ? (
           <div>
-            <label className='block text-sm font-medium text-slate-700 mb-2'>Meeting Link / Platform *</label>
+            <label className='mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300'>{t('employer.interviews.create.meetingLink')}</label>
             <Input
               type='url'
               name='meetingLink'
-              placeholder='https://meet.google.com/... or Zoom link'
+              placeholder={t('employer.interviews.create.meetingLinkPlaceholder')}
               value={formData.meetingLink}
               onChange={handleChange}
               className='rounded-lg'
             />
-            {errors.meetingLink && <p className='text-xs text-red-500 mt-1'>{errors.meetingLink}</p>}
-            <p className='text-xs text-slate-500 mt-1'>Include platform name (Google Meet, Zoom, Teams, etc.)</p>
+            {errors.meetingLink && <p className='mt-1 text-xs text-red-500'>{errors.meetingLink}</p>}
           </div>
         ) : (
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-            <div>
-              <label className='block text-sm font-medium text-slate-700 mb-2'>Office Location *</label>
-              <Input
-                type='text'
-                name='location'
-                placeholder='e.g., Office 3F - Meeting Room A'
-                value={formData.location}
-                onChange={handleChange}
-                className='rounded-lg'
-              />
-              {errors.location && <p className='text-xs text-red-500 mt-1'>{errors.location}</p>}
-            </div>
-            <div>
-              <label className='block text-sm font-medium text-slate-700 mb-2'>Additional Details</label>
-              <Input type='text' placeholder='e.g., Parking info, building access, etc.' className='rounded-lg' />
-            </div>
+          <div>
+            <label className='mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300'>{t('employer.interviews.create.locationDetails')}</label>
+            <Input
+              type='text'
+              name='location'
+              placeholder={t('employer.interviews.create.locationPlaceholder')}
+              value={formData.location}
+              onChange={handleChange}
+              className='rounded-lg'
+            />
+            {errors.location && <p className='mt-1 text-xs text-red-500'>{errors.location}</p>}
           </div>
         )}
       </div>
 
-      {/* Section 5: Notes */}
       <div className='space-y-4'>
         <div className='flex items-center gap-2'>
-          <Clock className='h-5 w-5 text-slate-600' />
-          <h3 className='text-sm font-semibold text-slate-950'>Additional Notes</h3>
+          <Clock className='h-5 w-5 text-slate-600 dark:text-slate-400' />
+          <h3 className='text-sm font-semibold text-slate-950 dark:text-white'>{t('employer.interviews.create.notesTitle')}</h3>
         </div>
-        <div>
-          <label className='block text-sm font-medium text-slate-700 mb-2'>Candidate Notes</label>
-          <textarea
-            name='notes'
-            value={formData.notes}
-            onChange={handleChange}
-            placeholder='Share any special instructions or requirements for the candidate (optional)'
-            rows={4}
-            className='w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none'
-          />
-        </div>
+        <textarea
+          name='notes'
+          value={formData.notes}
+          onChange={handleChange}
+          placeholder={t('employer.interviews.create.notesPlaceholder')}
+          rows={4}
+          className='w-full min-w-0 resize-none rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-white/8 dark:bg-white/5 dark:text-slate-100 dark:placeholder:text-slate-500'
+        />
       </div>
 
-      {/* Action Buttons */}
-      <div className='flex items-center justify-end gap-3 pt-6 border-t border-slate-200'>
-        <Button type='button' variant='outline' onClick={onClose} className='rounded-lg'>
-          Cancel
+      <div className='flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-end dark:border-white/8'>
+        <Button type='button' variant='outline' onClick={onClose} className='w-full rounded-lg sm:w-auto'>
+          {t('employer.actions.cancel')}
         </Button>
-        <Button type='submit' disabled={isSubmitting} className='rounded-lg'>
-          {isSubmitting ? 'Creating...' : 'Create Schedule'}
+        <Button type='submit' disabled={isSubmitting} className='w-full rounded-lg sm:w-auto'>
+          {isSubmitting ? t('employer.actions.creating') : t('employer.interviews.create.submit')}
         </Button>
       </div>
     </form>

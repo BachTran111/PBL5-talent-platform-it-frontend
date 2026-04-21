@@ -1,128 +1,235 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
+import {
+  createEmployerJobApi,
+  getEmployerCategoryOptionsApi,
+  getEmployerJobTypeOptionsApi,
+  getEmployerProfileApi
+} from '@/api/employer'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { useEmployerWorkspace } from './EmployerWorkspaceContext'
+import { Input } from '@/components/ui/input'
 
 interface CreateJobFormProps {
   onClose?: () => void
 }
 
+type Option = {
+  id: number
+  name: string
+}
+
+const parseSalary = (value: string) => {
+  const numbers = value.match(/\d+/g)?.map(Number) ?? []
+  const min = numbers[0] ?? 0
+  const max = numbers[1] ?? min
+
+  return {
+    min: Math.min(min, max),
+    max: Math.max(min, max)
+  }
+}
+
 const CreateJobForm = ({ onClose }: CreateJobFormProps) => {
-  const { createMockJob } = useEmployerWorkspace()
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const [companyId, setCompanyId] = useState<number | null>(null)
+  const [categories, setCategories] = useState<Option[]>([])
+  const [jobTypes, setJobTypes] = useState<Option[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     title: '',
-    category: '',
-    jobType: 'Full-time',
+    description: '',
+    categoryId: '',
+    jobTypeId: '',
     workLocation: '',
     salary: '',
-    level: 'Middle'
+    requirements: ''
   })
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadOptions = async () => {
+      try {
+        const [profile, categoryOptions, jobTypeOptions] = await Promise.all([
+          getEmployerProfileApi(),
+          getEmployerCategoryOptionsApi(),
+          getEmployerJobTypeOptionsApi()
+        ])
+
+        if (!isMounted) return
+
+        setCompanyId(profile.company.company_id)
+        setCategories(categoryOptions)
+        setJobTypes(jobTypeOptions)
+        setForm((current) => ({
+          ...current,
+          categoryId: current.categoryId || String(categoryOptions[0]?.id ?? ''),
+          jobTypeId: current.jobTypeId || String(jobTypeOptions[0]?.id ?? '')
+        }))
+      } catch {
+        if (isMounted) {
+          setError(t('employer.jobs.create.loadError'))
+        }
+      }
+    }
+
+    void loadOptions()
+
+    return () => {
+      isMounted = false
+    }
+  }, [t])
 
   const handleChange = (key: keyof typeof form, value: string) => {
     setForm((current) => ({ ...current, [key]: value }))
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setError(null)
 
-    if (!form.title || !form.category || !form.workLocation || !form.salary) {
-      alert('Please fill in all required fields')
+    if (!companyId || !form.title || !form.description || !form.categoryId || !form.jobTypeId || !form.salary) {
+      setError(t('employer.jobs.create.requiredError'))
       return
     }
 
-    createMockJob(form)
-    setForm({
-      title: '',
-      category: '',
-      jobType: 'Full-time',
-      workLocation: '',
-      salary: '',
-      level: 'Middle'
-    })
+    const salaryRange = parseSalary(form.salary)
+    const requirements = form.requirements
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean)
 
-    onClose?.()
+    setIsSubmitting(true)
+
+    try {
+      await createEmployerJobApi({
+        title: form.title,
+        description: [form.description, form.workLocation ? `${t('employer.jobs.table.location')}: ${form.workLocation}` : null].filter(Boolean).join('\n\n'),
+        categoryId: Number(form.categoryId),
+        jobTypeId: Number(form.jobTypeId),
+        companyId,
+        salaryRange,
+        requirements: requirements.length > 0 ? requirements : [t('employer.jobs.create.fallbackRequirement')]
+      })
+
+      onClose?.()
+      navigate('/employer/jobs')
+    } catch (submitError) {
+      const message =
+        submitError && typeof submitError === 'object' && 'response' in submitError
+          ? (submitError as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null
+      setError(message || t('employer.jobs.create.submitError'))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
+    <form onSubmit={handleSubmit} className='min-w-0 space-y-4'>
       <FieldGroup className='gap-4'>
+        {error ? <p className='break-words rounded-lg border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200'>{error}</p> : null}
+
         <Field>
-          <FieldLabel>Position Title *</FieldLabel>
+          <FieldLabel>{t('employer.jobs.create.labels.positionTitle')}</FieldLabel>
           <Input
             value={form.title}
             onChange={(event) => handleChange('title', event.target.value)}
-            placeholder='Senior Backend Engineer'
+            placeholder={t('employer.jobs.create.placeholders.positionTitle')}
             required
           />
         </Field>
-        <div className='grid gap-4 md:grid-cols-2'>
+
+        <Field>
+          <FieldLabel>{t('employer.jobs.create.labels.description')}</FieldLabel>
+          <textarea
+            value={form.description}
+            onChange={(event) => handleChange('description', event.target.value)}
+            rows={4}
+            className='border-input min-h-28 w-full min-w-0 rounded-md border bg-white px-3 py-2 text-sm outline-none transition-colors dark:bg-white/5 dark:text-slate-100 dark:placeholder:text-slate-500'
+            placeholder={t('employer.jobs.create.placeholders.description')}
+            required
+          />
+        </Field>
+
+        <div className='grid min-w-0 gap-4 md:grid-cols-2'>
           <Field>
-            <FieldLabel>Category *</FieldLabel>
-            <Input
-              value={form.category}
-              onChange={(event) => handleChange('category', event.target.value)}
-              placeholder='Engineering'
+            <FieldLabel>{t('employer.jobs.create.labels.category')}</FieldLabel>
+            <select
+              value={form.categoryId}
+              onChange={(event) => handleChange('categoryId', event.target.value)}
+              className='border-input h-10 w-full min-w-0 rounded-md border bg-white px-3 text-sm outline-none transition-colors dark:bg-white/5 dark:text-slate-100'
               required
-            />
+            >
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field>
-            <FieldLabel>Job Type</FieldLabel>
+            <FieldLabel>{t('employer.jobs.create.labels.jobType')}</FieldLabel>
             <select
-              value={form.jobType}
-              onChange={(event) => handleChange('jobType', event.target.value)}
-              className='border-input h-10 w-full rounded-md border bg-white px-3 text-sm outline-none'
+              value={form.jobTypeId}
+              onChange={(event) => handleChange('jobTypeId', event.target.value)}
+              className='border-input h-10 w-full min-w-0 rounded-md border bg-white px-3 text-sm outline-none transition-colors dark:bg-white/5 dark:text-slate-100'
+              required
             >
-              <option>Full-time</option>
-              <option>Part-time</option>
-              <option>Hybrid</option>
-              <option>Remote</option>
+              {jobTypes.map((jobType) => (
+                <option key={jobType.id} value={jobType.id}>
+                  {jobType.name}
+                </option>
+              ))}
             </select>
           </Field>
         </div>
-        <div className='grid gap-4 md:grid-cols-2'>
+
+        <div className='grid min-w-0 gap-4 md:grid-cols-2'>
           <Field>
-            <FieldLabel>Location *</FieldLabel>
+            <FieldLabel>{t('employer.jobs.create.labels.location')}</FieldLabel>
             <Input
               value={form.workLocation}
               onChange={(event) => handleChange('workLocation', event.target.value)}
-              placeholder='Da Nang'
-              required
+              placeholder={t('employer.jobs.create.placeholders.location')}
             />
           </Field>
           <Field>
-            <FieldLabel>Salary *</FieldLabel>
+            <FieldLabel>{t('employer.jobs.create.labels.salary')}</FieldLabel>
             <Input
               value={form.salary}
               onChange={(event) => handleChange('salary', event.target.value)}
-              placeholder='25 - 35 million'
+              placeholder={t('employer.jobs.create.placeholders.salary')}
               required
             />
           </Field>
         </div>
+
         <Field>
-          <FieldLabel>Level</FieldLabel>
-          <select
-            value={form.level}
-            onChange={(event) => handleChange('level', event.target.value)}
-            className='border-input h-10 w-full rounded-md border bg-white px-3 text-sm outline-none'
-          >
-            <option>Junior</option>
-            <option>Middle</option>
-            <option>Senior</option>
-            <option>Lead</option>
-          </select>
+          <FieldLabel>{t('employer.jobs.create.labels.requirements')}</FieldLabel>
+          <textarea
+            value={form.requirements}
+            onChange={(event) => handleChange('requirements', event.target.value)}
+            rows={4}
+            className='border-input min-h-28 w-full min-w-0 rounded-md border bg-white px-3 py-2 text-sm outline-none transition-colors dark:bg-white/5 dark:text-slate-100 dark:placeholder:text-slate-500'
+            placeholder={t('employer.jobs.create.placeholders.requirements')}
+          />
         </Field>
-        <div className='flex gap-3 pt-4'>
-          <Button type='submit' className='flex-1 rounded-xl'>
+
+        <div className='flex flex-col gap-3 pt-4 sm:flex-row'>
+          <Button type='submit' disabled={isSubmitting} className='w-full flex-1 rounded-xl'>
             <Plus className='h-4 w-4' />
-            Create Job
+            {isSubmitting ? t('employer.actions.creating') : t('employer.jobs.create.submit')}
           </Button>
           {onClose && (
-            <Button type='button' variant='outline' className='flex-1 rounded-xl' onClick={onClose}>
-              Cancel
+            <Button type='button' variant='outline' className='w-full flex-1 rounded-xl' onClick={onClose}>
+              {t('employer.actions.cancel')}
             </Button>
           )}
         </div>

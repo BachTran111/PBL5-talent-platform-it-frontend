@@ -1,0 +1,527 @@
+{
+  "language": {
+    "switchTo": "Switch language",
+    "current": "English",
+    "short": "EN"
+  },
+  "nav": {
+    "jobs": "Jobs",
+    "companies": "Companies",
+    "categories": "Categories",
+    "resources": "Resources",
+    "postJob": "Post a Job",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "dashboard": "Dashboard",
+    "goToDashboard": "Go to Dashboard",
+    "logout": "Logout",
+    "account": "Account",
+    "openChat": "Open chat",
+    "openAccountMenu": "Open account menu",
+    "searchJobs": "Search jobs...",
+    "mobileNavigation": "Mobile navigation",
+    "primaryNavigation": "Primary navigation"
+  },
+  "browseJobs": {
+    "search": {
+      "placeholder": "Search by job title, skill or company...",
+      "location": "Hanoi, HCM...",
+      "allLocations": "All locations",
+      "notifications": "Notifications",
+      "saved": "Saved"
+    },
+    "filters": {
+      "open": "Filters",
+      "close": "Close filters",
+      "title": "Filters",
+      "description": "Refine job results",
+      "programmingLanguages": "Programming Languages",
+      "chooseLanguage": "Choose language",
+      "noMatches": "No matching options",
+      "experienceLevel": "Experience Level",
+      "workType": "Work Type",
+      "jobType": "Job Type",
+      "chooseJobType": "Choose job type",
+      "postedWithin": "Posted Within",
+      "chooseTime": "Choose time",
+      "salaryRange": "Salary Range (Monthly)",
+      "from": "From",
+      "to": "To",
+      "salaryHelp": "Enter your preferred salary range to narrow down matching jobs.",
+      "reset": "Reset",
+      "apply": "Apply Filters"
+    },
+    "results": {
+      "title": "Recommended Jobs",
+      "found": "Found {{count}} matching jobs for you",
+      "updating": "Updating...",
+      "latest": "Latest",
+      "bestMatch": "Best Match",
+      "savedJobs": "Saved Jobs",
+      "showing": "Showing",
+      "showingRange": "{{from}}-{{to}} of {{count}}",
+      "showingJobs": "Showing {{from}}-{{to}} of {{count}} jobs",
+      "sortBy": "Sort by",
+      "newestFirst": "Newest First",
+      "suggestedFilters": "Suggested filters",
+      "clearAll": "Clear all"
+    },
+    "jobCard": {
+      "developerHiring": "Developer Hiring",
+      "extraSkills": "+{{count}} skills",
+      "saveJob": "Save job",
+      "viewDetails": "View Details",
+      "apply": "Apply"
+    },
+    "empty": {
+      "title": "No jobs match your filters",
+      "description": "Try removing a few filters or broaden your search to discover more opportunities across Vietnam.",
+      "reset": "Reset Filters"
+    },
+    "alerts": {
+      "title": "Job Alerts",
+      "description": "Get notified about new jobs matching your current filters.",
+      "enable": "Enable Alerts"
+    },
+    "topCompanies": {
+      "title": "Top Companies",
+      "jobs": "{{count}} Jobs",
+      "viewAll": "View all companies"
+    },
+    "careerTips": {
+      "title": "Career Tips",
+      "cvTips": "CV tips",
+      "interviewPrep": "Interview prep",
+      "salaryGuide": "Salary guide",
+      "explore": "Explore resources"
+    },
+    "pagination": {
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "values": {
+      "junior": "Junior",
+      "senior": "Senior",
+      "leadArchitect": "Lead / Architect",
+      "remote": "Remote",
+      "hybrid": "Hybrid",
+      "onSite": "On-site",
+      "fullTime": "Full-time",
+      "contract": "Contract",
+      "partTime": "Part-time",
+      "allLevels": "All levels",
+      "locationFlexible": "Location flexible",
+      "salaryNegotiable": "Salary negotiable",
+      "recentlyPosted": "Recently posted",
+      "justNow": "Just now",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "hoursAgo": "{{count}} hours ago",
+      "daysAgo": "{{count}} days ago"
+    }
+  },
+  "jobDetail": {
+    "active": "Active",
+    "posted": "Posted {{date}}",
+    "updated": "Updated {{date}}",
+    "applicants": "{{count}} applicants",
+    "applyNow": "Apply Now",
+    "applying": "Applying...",
+    "applied": "Applied",
+    "bookmarked": "Bookmarked",
+    "saveJob": "Save Job",
+    "saved": "Saved",
+    "shareThisRole": "Share this role",
+    "shareLinkedIn": "Share on LinkedIn",
+    "copyLink": "Copy job link",
+    "shareEmail": "Share by email",
+    "viewCompany": "View Company",
+    "similarRoles": "Similar Roles",
+    "hiringCompany": "Hiring company",
+    "sections": "Job detail sections",
+    "tryAgain": "Try Again",
+    "backToJobs": "Back to Jobs"
+  },
+  "employer": {
+    "searchPlaceholder": "Search candidates, jobs, or actions...",
+    "roleLabel": "Recruitment",
+    "toggleTheme": "Toggle theme",
+    "openNotifications": "Open notifications",
+    "notifications": {
+      "title": "Notifications",
+      "description": "Recruitment actions that may need attention.",
+      "reviewCandidates": {
+        "title": "Review new candidates",
+        "description": "Open the candidate pipeline and review recent applications.",
+        "time": "Now"
+      },
+      "checkInterviews": {
+        "title": "Check interview schedule",
+        "description": "See upcoming interview slots and schedule changes.",
+        "time": "Today"
+      },
+      "keepJobsUpdated": {
+        "title": "Keep jobs up to date",
+        "description": "Manage active postings and publish new opportunities.",
+        "time": "Active"
+      }
+    },
+    "profile": {
+      "employeeFallback": "Employer",
+      "viewProfile": "View Profile",
+      "chat": "Chat"
+    },
+    "sidebar": {
+      "overview": "Overview",
+      "jobs": "Jobs",
+      "candidates": "Candidates",
+      "interviews": "Interviews",
+      "workspace": "Workspace",
+      "console": "Employer Console",
+      "consoleDescription": "Built for recruiting operations and daily hiring workflow.",
+      "closeSidebar": "Close sidebar"
+    },
+    "header": {
+      "openNavigation": "Open navigation",
+      "closeNavigation": "Close navigation",
+      "expandSidebar": "Expand sidebar",
+      "collapseSidebar": "Collapse sidebar",
+      "searchDashboard": "Search employer dashboard",
+      "openProfileMenu": "Open profile menu",
+      "closeNavigationDrawer": "Close navigation drawer"
+    },
+    "actions": {
+      "export": "Export",
+      "view": "View",
+      "close": "Close",
+      "cancel": "Cancel",
+      "creating": "Creating..."
+    },
+    "statuses": {
+      "OPEN": "Open",
+      "PAUSED": "Paused",
+      "SCHEDULED": "Scheduled",
+      "COMPLETED": "Completed"
+    },
+    "overview": {
+      "eyebrow": "Recruitment command center",
+      "welcomeTitle": "Welcome {{name}}, how is your pipeline looking today?",
+      "descriptionWithCompany": "You are managing recruitment activities for {{company}}. Data below is fetched directly from the current system backend.",
+      "descriptionFallback": "Track recruitment performance, new candidates, and interview schedules in one place.",
+      "createJob": "Create New Job Post",
+      "viewCandidates": "View Candidate List",
+      "loadingTitle": "Loading dashboard",
+      "loadingDescription": "System is aggregating recruitment data from backend.",
+      "failedTitle": "Failed to load dashboard",
+      "stats": {
+        "openJobs": "Open Job Postings",
+        "applicationsReceived": "{{count}} applications received",
+        "newCandidates": "New Candidates",
+        "last7Days": "In the last 7 days",
+        "interviewSchedule": "Interview Schedule",
+        "beingScheduled": "Being scheduled",
+        "successfulHires": "Successful Hires",
+        "activeChats": "{{count}} active chats"
+      },
+      "funnel": {
+        "title": "Recruitment Funnel",
+        "description": "Aggregated from current application statuses in the system.",
+        "snapshot": "Snapshot",
+        "live": "Live",
+        "newCvs": "New CVs",
+        "shortlisted": "Shortlisted",
+        "interviews": "Interviews",
+        "hired": "Hired",
+        "rejected": "Rejected",
+        "profiles": "{{count}} profiles"
+      },
+      "today": {
+        "title": "Today's Schedule",
+        "description": "Interview schedules occurring today.",
+        "emptyTitle": "No interviews scheduled for today",
+        "emptyDescription": "When there are interviews scheduled for today, they will appear here.",
+        "noTime": "No time set",
+        "candidate": "Candidate"
+      },
+      "activeJobs": {
+        "title": "Active Job Postings",
+        "description": "Your latest open positions.",
+        "viewAll": "View All"
+      },
+      "topCandidates": {
+        "title": "Top Candidates",
+        "description": "Recently submitted applications from backend.",
+        "viewCandidates": "View Candidates"
+      }
+    },
+    "jobs": {
+      "page": {
+        "eyebrow": "Jobs management",
+        "title": "Company Job Postings",
+        "description": "Monitor open positions, number of applicants, and latest update time.",
+        "addJob": "Add Job",
+        "sectionTitle": "All Job Postings",
+        "sectionDescription": "Data sourced directly from the backend employer jobs endpoint.",
+        "loadingTitle": "Loading jobs",
+        "loadingDescription": "System is fetching the company job postings list.",
+        "failedTitle": "Failed to load jobs"
+      },
+      "empty": {
+        "noJobsTitle": "No job postings yet",
+        "noJobsDescription": "Create your first position to start receiving candidate applications.",
+        "noResultsTitle": "No jobs found",
+        "noResultsDescription": "Try adjusting your search terms."
+      },
+      "filters": {
+        "searchPlaceholder": "Search by title, category, location..."
+      },
+      "table": {
+        "jobTitle": "Job Title",
+        "category": "Category",
+        "location": "Location",
+        "salary": "Salary",
+        "applicants": "Applicants",
+        "status": "Status",
+        "updated": "Updated",
+        "updatedDate": "Updated Date",
+        "action": "Action",
+        "jobType": "Job Type",
+        "experience": "Experience",
+        "level": "Level"
+      },
+      "modal": {
+        "jobDetails": "Job Details",
+        "remote": "Remote",
+        "negotiable": "Negotiable",
+        "notSpecified": "Not specified",
+        "viewApplications": "View Applications"
+      },
+      "create": {
+        "back": "Back to Jobs",
+        "eyebrow": "Create new posting",
+        "title": "Add New Job Position",
+        "description": "Fill in the details below to create a new job posting. Your position will be published immediately to candidate pool.",
+        "sectionTitle": "Job Details",
+        "sectionDescription": "Enter all required information for your job posting.",
+        "loadError": "Unable to load job form options from backend.",
+        "requiredError": "Please fill in all required fields.",
+        "submitError": "Unable to create this job right now.",
+        "fallbackRequirement": "Requirements will be updated by recruiter.",
+        "labels": {
+          "positionTitle": "Position Title *",
+          "description": "Description *",
+          "category": "Category *",
+          "jobType": "Job Type *",
+          "location": "Location",
+          "salary": "Salary *",
+          "requirements": "Requirements"
+        },
+        "placeholders": {
+          "positionTitle": "Senior Backend Engineer",
+          "description": "Describe the role, responsibilities, and team context.",
+          "location": "Da Nang",
+          "salary": "2500 - 3500",
+          "requirements": "One requirement per line"
+        },
+        "submit": "Create Job"
+      }
+    },
+    "interviews": {
+      "page": {
+        "eyebrow": "Interview schedule",
+        "title": "Interview Schedule",
+        "description": "Company interview schedules including candidate, round, and interviewer.",
+        "addSchedule": "Add Schedule",
+        "sectionTitle": "All Interview Schedules",
+        "sectionDescription": "Data sourced from InterviewSchedule via employer endpoint.",
+        "loadingTitle": "Loading interview schedules",
+        "loadingDescription": "System is syncing the latest interview schedules.",
+        "failedTitle": "Failed to load interview schedules"
+      },
+      "empty": {
+        "noInterviewsTitle": "No interview schedules yet",
+        "noInterviewsDescription": "When you create an interview schedule, it will appear here.",
+        "noResultsTitle": "No interviews found",
+        "noResultsDescription": "Try adjusting your search or filters."
+      },
+      "filters": {
+        "searchPlaceholder": "Search by candidate, job, location...",
+        "allStatus": "All Status",
+        "sortDate": "Sort: Date",
+        "sortStatus": "Sort: Status"
+      },
+      "table": {
+        "candidate": "Candidate",
+        "jobTitle": "Job Title",
+        "date": "Date",
+        "time": "Time",
+        "dateTime": "Date & Time",
+        "interviewType": "Interview Type",
+        "location": "Location",
+        "status": "Status",
+        "action": "Action",
+        "unknown": "Unknown",
+        "notSpecified": "Not specified",
+        "interviewer": "Interviewer",
+        "round": "Round {{round}}"
+      },
+      "modal": {
+        "schedule": "Interview Schedule",
+        "meetingDetails": "Meeting Details",
+        "meetingLink": "Meeting Link",
+        "interviewLocation": "Interview Location",
+        "candidateInformation": "Candidate Information",
+        "notes": "Interview Notes",
+        "reschedule": "Reschedule"
+      },
+      "scheduleForm": {
+        "title": "Schedule Interview",
+        "description": "New interviews will be added to the interviews table and candidate mock.",
+        "candidateName": "Candidate Name",
+        "candidateNamePlaceholder": "John Doe",
+        "email": "Email",
+        "emailPlaceholder": "candidate@example.com",
+        "interviewer": "Interviewer",
+        "interviewerPlaceholder": "Nguyen Minh Recruiter",
+        "position": "Position",
+        "dateTime": "Date & Time",
+        "interviewType": "Interview Type",
+        "technical": "Technical",
+        "hrScreen": "HR Screen",
+        "locationLink": "Location / Link",
+        "locationLinkPlaceholder": "Google Meet / Office 3F",
+        "addToSchedule": "Add to Schedule"
+      },
+      "create": {
+        "back": "Back to Interviews",
+        "eyebrow": "Interview schedule",
+        "title": "Create New Interview Schedule",
+        "description": "Set up a new interview session with a candidate for a specific position.",
+        "sectionTitle": "Schedule Interview",
+        "sectionDescription": "Fill in the interview details including date, time, and location or meeting link.",
+        "loadError": "Unable to load candidates from backend.",
+        "submitError": "Failed to create interview schedule.",
+        "selectCandidateTitle": "Select Candidate & Position",
+        "candidate": "Candidate *",
+        "chooseCandidate": "Choose candidate...",
+        "jobPosition": "Job Position",
+        "scheduleTitle": "Interview Schedule",
+        "interviewDate": "Interview Date *",
+        "startTime": "Start Time *",
+        "endTime": "End Time *",
+        "methodTitle": "Interview Method",
+        "locationTitle": "Interview Location",
+        "meetingLink": "Meeting Link / Platform *",
+        "meetingLinkPlaceholder": "https://meet.google.com/... or Zoom link",
+        "locationDetails": "Location / Phone Details",
+        "locationPlaceholder": "Office 3F - Meeting Room A or phone call details",
+        "notesTitle": "Additional Notes",
+        "notesPlaceholder": "Internal notes for this schedule",
+        "submit": "Create Schedule",
+        "validation": {
+          "candidate": "Please select a candidate",
+          "date": "Please select an interview date",
+          "startTime": "Please enter start time",
+          "endTime": "Please enter end time",
+          "meetingLink": "Please provide a meeting link for online interview",
+          "location": "Please provide a location for offline interview"
+        },
+        "types": {
+          "Online": "Online",
+          "Offline": "Offline",
+          "Phone": "Phone"
+        }
+      }
+    },
+    "candidates": {
+      "page": {
+        "eyebrow": "Candidate pipeline",
+        "title": "Submitted Candidates",
+        "description": "Aggregated from applications and candidate profiles related to company jobs.",
+        "export": "Export",
+        "sectionTitle": "Candidate List",
+        "sectionDescription": "Track current stage, key skills, and upcoming interviews.",
+        "loadingTitle": "Loading candidates",
+        "loadingDescription": "System is fetching the latest candidate list.",
+        "failedTitle": "Failed to load candidates"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name, email, skills...",
+        "allJobs": "All Jobs",
+        "allStages": "All Stages"
+      },
+      "empty": {
+        "noCandidatesTitle": "No candidates yet",
+        "noCandidatesDescription": "When candidates apply to your job posts, they will appear here.",
+        "noResultsTitle": "No candidates found",
+        "noResultsDescription": "Try adjusting your search or filters."
+      },
+      "table": {
+        "candidateName": "Candidate Name",
+        "jobTitle": "Job Title",
+        "email": "Email",
+        "stage": "Stage",
+        "skills": "Skills",
+        "appliedDate": "Applied Date",
+        "action": "Action",
+        "applied": "Applied",
+        "view": "View",
+        "unknown": "Unknown"
+      },
+      "modal": {
+        "closeDetails": "Close candidate details",
+        "appliedFor": "Applied for: {{job}}",
+        "contactInformation": "Contact Information",
+        "phone": "Phone",
+        "applicationStatus": "Application Status",
+        "jobPosition": "Job Position",
+        "close": "Close",
+        "reject": "Reject",
+        "accept": "Accept",
+        "updating": "Updating...",
+        "acceptedMessage": "Candidate accepted. You can now schedule an interview.",
+        "acceptError": "Unable to accept this candidate right now.",
+        "rejectedMessage": "Candidate rejected.",
+        "rejectError": "Unable to reject this candidate right now.",
+        "rejectReason": "Rejected by recruiter"
+      },
+      "status": {
+        "APPLIED": "Applied",
+        "PENDING": "Pending",
+        "PASSED": "Passed",
+        "ACCEPTED": "Accepted",
+        "REJECTED": "Rejected",
+        "INTERVIEW_SCHEDULED": "Interview scheduled",
+        "INTERVIEW_COMPLETED": "Interview completed",
+        "INTERVIEW_CANCELLED": "Interview cancelled"
+      }
+    }
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "welcomeBack": "Welcome back, {{name}}",
+    "searchPlaceholder": "Search users, jobs, companies...",
+    "notifications": "Notifications",
+    "console": "Admin Console",
+    "goHome": "Go to home",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "menu": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "companies": "Companies",
+      "reports": "Reports",
+      "settings": "Settings"
+    },
+    "theme": {
+      "mode": "Mode",
+      "theme": "Theme",
+      "dark": "Dark",
+      "light": "Light"
+    },
+    "logout": "Log out",
+    "workspaceSynced": "Admin workspace synced",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  }
+}

@@ -2,9 +2,8 @@ import type { FooterLinkGroup, NavItem } from '@/types'
 
 export const navigationItems: NavItem[] = [
   { label: 'Find Jobs', href: '/jobs' },
-  { label: 'Companies', href: '/companies' },
-  { label: 'Career Advice', href: '/career-advice' },
-  { label: 'For Employers', href: '/for-employers' }
+  { label: 'Career Advice', href: '/jobs' },
+  { label: 'For Employers', href: '/employer/jobs/create' }
 ]
 
 export const footerLinkGroups: FooterLinkGroup[] = [
@@ -12,27 +11,27 @@ export const footerLinkGroups: FooterLinkGroup[] = [
     title: 'For Candidates',
     links: [
       { label: 'Browse Jobs', href: '/jobs' },
-      { label: 'Remote Jobs', href: '/jobs?type=remote' },
-      { label: 'CV Templates', href: '/cv-templates' },
-      { label: 'Salaries', href: '/salaries' }
+      { label: 'Remote Jobs', href: '/jobs' },
+      { label: 'CV Templates', href: '/jobs' },
+      { label: 'Salaries', href: '/jobs' }
     ]
   },
   {
     title: 'For Employers',
     links: [
-      { label: 'Post a Job', href: '/employer/post-job' },
-      { label: 'Candidate Search', href: '/candidate-search' },
-      { label: 'Pricing', href: '/pricing' },
-      { label: 'Hiring Solutions', href: '/hiring-solutions' }
+      { label: 'Post a Job', href: '/employer/jobs/create' },
+      { label: 'Candidate Search', href: '/employer/candidates' },
+      { label: 'Pricing', href: '/employer' },
+      { label: 'Hiring Solutions', href: '/employer' }
     ]
   },
   {
     title: 'Support',
     links: [
-      { label: 'Help Center', href: '/help-center' },
-      { label: 'Contact Us', href: '/contact' },
-      { label: 'Privacy Policy', href: '/privacy-policy' },
-      { label: 'Terms of Service', href: '/terms-of-service' }
+      { label: 'Help Center', href: '/jobs' },
+      { label: 'Contact Us', href: '/jobs' },
+      { label: 'Privacy Policy', href: '/jobs' },
+      { label: 'Terms of Service', href: '/jobs' }
     ]
   }
 ]

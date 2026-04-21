@@ -9,6 +9,7 @@ interface AuthState {
   // State
   user: User | null
   accessToken: string | null
+  refreshToken: string | null
   isAuthenticated: boolean
   isLoading: boolean
   isShowPassword: boolean
@@ -24,7 +25,7 @@ interface AuthState {
   resetSuccess: boolean
 
   // Actions
-  setAuth: (user: User, token: string) => void
+  setAuth: (user: User, token: string, refreshToken?: string) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   setShowPassword: (isShowPassword: boolean) => void
@@ -51,6 +52,7 @@ export const useAuthStore = create<AuthState>()(
       // initial state
       user: null,
       accessToken: null,
+      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       isShowPassword: false,
@@ -68,17 +70,21 @@ export const useAuthStore = create<AuthState>()(
       // action
 
       // Set auth sau khi đăng nhập thành công
-      setAuth: (user, token) => {
+      setAuth: (user, token, refreshToken) => {
         console.log('[AuthStore] setAuth called')
         console.log('[AuthStore] User:', user)
         console.log('[AuthStore] Token:', token?.substring(0, 20) + '...')
 
         // Lưu token vào localStorage (cho axios interceptor)
         localStorage.setItem('accessToken', token)
+        if (refreshToken) {
+          localStorage.setItem('refreshToken', refreshToken)
+        }
 
         set({
           user,
           accessToken: token,
+          refreshToken: refreshToken ?? useAuthStore.getState().refreshToken,
           isAuthenticated: true,
           isLoading: false,
           isShowPassword: false,
@@ -248,11 +254,15 @@ export const useAuthStore = create<AuthState>()(
 
           // 3. Lưu token vào localStorage
           localStorage.setItem('accessToken', response.access_token)
+          if (response.refresh_token) {
+            localStorage.setItem('refreshToken', response.refresh_token)
+          }
 
           // 4. Cập nhật state
           set({
             user: response.user,
             accessToken: response.access_token,
+            refreshToken: response.refresh_token ?? null,
             isAuthenticated: true,
             isLoading: false,
             error: null
@@ -286,10 +296,14 @@ export const useAuthStore = create<AuthState>()(
           console.log('[AuthStore] loginWithGoogle success:', response)
 
           localStorage.setItem('accessToken', response.access_token)
+          if (response.refresh_token) {
+            localStorage.setItem('refreshToken', response.refresh_token)
+          }
 
           set({
             user: response.user,
             accessToken: response.access_token,
+            refreshToken: response.refresh_token ?? null,
             isAuthenticated: true,
             isLoading: false,
             error: null
@@ -340,10 +354,11 @@ export const useAuthStore = create<AuthState>()(
       // Logout: clear tất cả state và gọi API
       logout: async () => {
         console.log('[AuthStore] logout called')
+        const refreshToken = useAuthStore.getState().refreshToken ?? localStorage.getItem('refreshToken')
 
         try {
           // Gọi API logout để invalidate token ở server
-          await logoutApi()
+          await logoutApi(refreshToken)
           console.log('[AuthStore] Logout API called successfully')
         } catch (error) {
           console.error('[AuthStore] Logout API error:', error)
@@ -352,10 +367,12 @@ export const useAuthStore = create<AuthState>()(
 
         // Xóa token khỏi localStorage
         localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
 
         set({
           user: null,
           accessToken: null,
+          refreshToken: null,
           isAuthenticated: false,
           isLoading: false,
           isShowPassword: false,
@@ -380,6 +397,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated
       })
     }

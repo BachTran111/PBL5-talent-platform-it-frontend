@@ -1,65 +1,293 @@
-import axios, { AxiosHeaders, CanceledError, type InternalAxiosRequestConfig } from 'axios'
-import { browseJobs as browseJobsDataset } from '@/data/browse-jobs/jobs'
-import type { BrowseJob, BrowseJobsQueryParams, BrowseJobsResponse } from '@/types/browse-jobs'
+import axiosInstance from '@/api/axiosInstance'
+import type { BrowseJob, BrowseJobsFilterOptions, BrowseJobsQueryParams, BrowseJobsResponse } from '@/types/browse-jobs'
 
-const SIMULATED_NETWORK_DELAY = 350
-
-const parseSalaryRange = (salary: string) => {
-  const [minSalary, maxSalary] = salary
-    .replace(/\$/g, '')
-    .split('-')
-    .map((value) => Number(value.replace(/[^\d]/g, '')))
-
-  return { minSalary, maxSalary }
+type SearchJobsApiItem = {
+  id: number
+  title: string
+  description?: string | null
+  requirements?: string | null
+  salary?: string | null
+  salaryRange?: {
+    min: number | null
+    max: number | null
+  } | null
+  location?: string | null
+  workType?: string | null
+  level?: string | null
+  skills?: string[]
+  createdDate?: string | null
+  company?: {
+    company_id: number
+    company_name: string
+    city?: string | null
+  } | null
+  category?: {
+    category_id: number
+    name: string
+  } | null
+  jobType?: {
+    job_type_id: number
+    job_type: string
+  } | null
 }
 
-const normalizeSalaryRange = (salaryMin: string, salaryMax: string) => {
-  const rawMin = salaryMin ? Number(salaryMin) : null
-  const rawMax = salaryMax ? Number(salaryMax) : null
-
-  return {
-    normalizedMin: rawMin !== null && rawMax !== null ? Math.min(rawMin, rawMax) : rawMin,
-    normalizedMax: rawMin !== null && rawMax !== null ? Math.max(rawMin, rawMax) : rawMax
+type SearchJobsApiResponse = {
+  jobs: SearchJobsApiItem[]
+  total: number
+  filters?: {
+    locations?: string[]
+    programmingLanguages?: Array<{
+      label: string
+      value: string
+      count: number
+    }>
+    jobTypes?: Array<{
+      label: string
+      value: string
+      count: number
+    }>
   }
 }
 
-const applyBrowseJobsFilters = (jobs: BrowseJob[], params: BrowseJobsQueryParams) => {
-  const normalizedQuery = params.searchQuery.trim().toLowerCase()
-  const { normalizedMin, normalizedMax } = normalizeSalaryRange(params.salaryMin, params.salaryMax)
+const KNOWN_TECH = [
+  'React',
+  'TypeScript',
+  'JavaScript',
+  'Node.js',
+  'NestJS',
+  'Python',
+  'Java',
+  'Go',
+  'PostgreSQL',
+  'Docker',
+  'AWS',
+  'Figma'
+]
+
+const logoTones = [
+  'from-amber-200 to-emerald-200',
+  'from-emerald-950 to-teal-800',
+  'from-slate-950 to-cyan-950',
+  'from-sky-950 to-indigo-900',
+  'from-violet-100 to-fuchsia-100'
+]
+
+const getCompanyInitials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('') || 'JB'
+
+const formatSalary = (job: SearchJobsApiItem) => {
+  if (job.salary?.trim()) {
+    return job.salary
+  }
+
+  const min = job.salaryRange?.min
+  const max = job.salaryRange?.max
+
+  if (typeof min === 'number' && typeof max === 'number') {
+    return `$${min.toLocaleString()} - $${max.toLocaleString()}`
+  }
+
+  if (typeof min === 'number') {
+    return `From $${min.toLocaleString()}`
+  }
+
+  if (typeof max === 'number') {
+    return `Up to $${max.toLocaleString()}`
+  }
+
+  return 'Salary negotiable'
+}
+
+const formatPostedAt = (createdDate?: string | null) => {
+  if (!createdDate) {
+    return 'Recently posted'
+  }
+
+  const timestamp = new Date(createdDate).getTime()
+
+  if (Number.isNaN(timestamp)) {
+    return 'Recently posted'
+  }
+
+  const diffMs = Date.now() - timestamp
+  const diffHours = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60)))
+
+  if (diffHours < 1) return 'Just now'
+  if (diffHours < 24) return `${diffHours} hours ago`
+
+  const diffDays = Math.floor(diffHours / 24)
+  return diffDays === 1 ? 'Yesterday' : `${diffDays} days ago`
+}
+
+const parseSalaryRange = (job: SearchJobsApiItem) => {
+  if (job.salaryRange?.min !== null || job.salaryRange?.max !== null) {
+    return job.salaryRange ?? { min: null, max: null }
+  }
+
+  if (!job.salary) {
+    return { min: null, max: null }
+  }
+
+  const [min, max] = job.salary
+    .split('-')
+    .map((part) => Number(part.replace(/[^\d]/g, '')))
+    .map((value) => (Number.isFinite(value) && value > 0 ? value : null))
+
+  return {
+    min: min ?? max ?? null,
+    max: max ?? min ?? null
+  }
+}
+
+const getSkills = (job: SearchJobsApiItem) => {
+  if (job.skills && job.skills.length > 0) {
+    return job.skills.filter(Boolean).slice(0, 6)
+  }
+
+  const source = [job.title, job.description, job.requirements, job.category?.name, job.jobType?.job_type]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  const matched = KNOWN_TECH.filter((skill) => source.includes(skill.toLowerCase()))
+
+  if (matched.length > 0) {
+    return matched.slice(0, 3)
+  }
+
+  return [job.category?.name, job.jobType?.job_type].filter((value): value is string => Boolean(value)).slice(0, 3)
+}
+
+const formatCount = (count: number) => count.toLocaleString()
+
+const mapFilterOptions = (filters?: SearchJobsApiResponse['filters']): BrowseJobsFilterOptions => ({
+  locations:
+    filters?.locations?.map((location) => ({
+      label: location,
+      value: location
+    })) ?? [],
+  programmingLanguages:
+    filters?.programmingLanguages?.map((option) => ({
+      label: option.label,
+      value: option.value,
+      count: formatCount(option.count)
+    })) ?? [],
+  jobTypes:
+    filters?.jobTypes?.map((option) => ({
+      label: option.label,
+      value: option.value,
+      count: formatCount(option.count)
+    })) ?? []
+})
+
+const normalizeJobType = (jobType?: string | null): BrowseJob['employmentType'] => {
+  const normalized = jobType?.toLowerCase() ?? ''
+
+  if (normalized.includes('contract')) return 'Contract'
+  if (normalized.includes('part')) return 'Part-time'
+
+  return 'Full-time'
+}
+
+const normalizeWorkType = (location?: string | null): BrowseJob['workType'] => {
+  const normalized = location?.toLowerCase() ?? ''
+
+  if (normalized.includes('remote')) return 'Remote'
+  if (normalized.includes('hybrid')) return 'Hybrid'
+
+  return 'On-site'
+}
+
+const normalizeApiWorkType = (workType?: string | null, location?: string | null): BrowseJob['workType'] => {
+  const normalized = workType?.toLowerCase() ?? ''
+
+  if (normalized.includes('remote')) return 'Remote'
+  if (normalized.includes('hybrid')) return 'Hybrid'
+  if (normalized.includes('onsite') || normalized.includes('on-site')) return 'On-site'
+
+  return normalizeWorkType(location)
+}
+
+const normalizeExperience = (job: SearchJobsApiItem) => {
+  const source = [job.level, job.title, job.description, job.requirements].filter(Boolean).join(' ').toLowerCase()
+
+  if (/\b(lead|architect|principal|staff)\b/.test(source)) {
+    return 'Lead / Architect'
+  }
+
+  if (/\b(senior|sr\.?|sen)\b/.test(source)) {
+    return 'Senior'
+  }
+
+  if (/\b(junior|jr\.?|fresher|entry|intern)\b/.test(source)) {
+    return 'Junior'
+  }
+
+  return job.level?.trim() || 'All levels'
+}
+
+const toBrowseJob = (job: SearchJobsApiItem, index: number): BrowseJob => {
+  const companyName = job.company?.company_name || 'Company'
+  const skills = getSkills(job)
+
+  return {
+    id: String(job.id),
+    title: job.title,
+    company: companyName,
+    location: job.location || job.company?.city || 'Location flexible',
+    salary: formatSalary(job),
+    postedAt: formatPostedAt(job.createdDate),
+    skills,
+    logoText: getCompanyInitials(companyName),
+    logoTone: logoTones[index % logoTones.length],
+    language: skills[0] || job.category?.name || 'General',
+    experience: normalizeExperience(job),
+    employmentType: normalizeJobType(job.jobType?.job_type),
+    workType: normalizeApiWorkType(job.workType, job.location)
+  }
+}
+
+const applyClientFilters = (jobs: SearchJobsApiItem[], params: BrowseJobsQueryParams) => {
+  const rawMax = params.salaryMax ? Number(params.salaryMax) : null
+  const normalizedMax = rawMax !== null && Number.isFinite(rawMax) ? rawMax : null
 
   return jobs.filter((job) => {
-    const { minSalary, maxSalary } = parseSalaryRange(job.salary)
-    const matchesQuery =
-      !normalizedQuery ||
-      job.title.toLowerCase().includes(normalizedQuery) ||
-      job.company.toLowerCase().includes(normalizedQuery) ||
-      job.skills.some((skill) => skill.toLowerCase().includes(normalizedQuery))
-
+    const mapped = toBrowseJob(job, 0)
+    const salaryRange = parseSalaryRange(job)
     const matchesLanguage =
-      params.selectedLanguages.length === 0 || params.selectedLanguages.includes(job.language)
+      params.selectedLanguages.length === 0 ||
+      params.selectedLanguages.some((language) => mapped.skills.includes(language))
     const matchesExperience =
-      params.selectedExperience.length === 0 || params.selectedExperience.includes(job.experience)
-    const matchesWorkType =
-      params.selectedWorkTypes.length === 0 || params.selectedWorkTypes.includes(job.workType)
+      params.selectedExperience.length === 0 || params.selectedExperience.includes(mapped.experience)
+    const matchesWorkType = params.selectedWorkTypes.length === 0 || params.selectedWorkTypes.includes(mapped.workType)
     const matchesJobType =
-      params.selectedJobTypes.length === 0 || params.selectedJobTypes.includes(job.employmentType)
-    const matchesSalaryMin = normalizedMin === null || maxSalary >= normalizedMin
-    const matchesSalaryMax = normalizedMax === null || minSalary <= normalizedMax
+      params.selectedJobTypes.length === 0 || params.selectedJobTypes.includes(mapped.employmentType)
+    const matchesSalaryMax = normalizedMax === null || salaryRange.min === null || salaryRange.min <= normalizedMax
 
-    return (
-      matchesQuery &&
-      matchesLanguage &&
-      matchesExperience &&
-      matchesWorkType &&
-      matchesJobType &&
-      matchesSalaryMin &&
-      matchesSalaryMax
-    )
+    return matchesLanguage && matchesExperience && matchesWorkType && matchesJobType && matchesSalaryMax
   })
 }
 
-const buildBrowseJobsResponse = (params: BrowseJobsQueryParams): BrowseJobsResponse => {
-  const filteredJobs = applyBrowseJobsFilters(browseJobsDataset, params)
+export const fetchBrowseJobs = async (
+  params: BrowseJobsQueryParams,
+  signal?: AbortSignal
+): Promise<BrowseJobsResponse> => {
+  const response = await axiosInstance.get<SearchJobsApiResponse>('/jobs/search', {
+    params: {
+      q: params.searchQuery || undefined,
+      location: params.selectedLocation || undefined,
+      salaryMin: params.salaryMin || undefined,
+      page: 1,
+      limit: 100
+    },
+    signal
+  })
+
+  const filteredJobs = applyClientFilters(response.data.jobs, params).map(toBrowseJob)
   const totalItems = filteredJobs.length
   const totalPages = Math.max(1, Math.ceil(totalItems / params.pageSize))
   const safeCurrentPage = Math.min(params.currentPage, totalPages)
@@ -75,54 +303,7 @@ const buildBrowseJobsResponse = (params: BrowseJobsQueryParams): BrowseJobsRespo
       totalPages,
       from: totalItems === 0 ? 0 : startIndex + 1,
       to: totalItems === 0 ? 0 : Math.min(startIndex + params.pageSize, totalItems)
-    }
+    },
+    filters: mapFilterOptions(response.data.filters)
   }
-}
-
-const browseJobsClient = axios.create({
-  adapter: async (config) => {
-    const signal = config.signal as AbortSignal | undefined
-
-    if (signal?.aborted) {
-      throw new CanceledError()
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      const handleAbort = () => {
-        window.clearTimeout(timer)
-        reject(new CanceledError())
-      }
-
-      const timer = window.setTimeout(() => {
-        if (signal) {
-          signal.removeEventListener('abort', handleAbort)
-        }
-        resolve()
-      }, SIMULATED_NETWORK_DELAY)
-
-      if (signal) {
-        signal.addEventListener('abort', handleAbort, { once: true })
-      }
-    })
-
-    const data = buildBrowseJobsResponse(config.params as BrowseJobsQueryParams)
-
-    return {
-      data,
-      status: 200,
-      statusText: 'OK',
-      headers: new AxiosHeaders(),
-      config: config as InternalAxiosRequestConfig,
-      request: null
-    }
-  }
-})
-
-export const fetchBrowseJobs = async (params: BrowseJobsQueryParams, signal?: AbortSignal) => {
-  const response = await browseJobsClient.get<BrowseJobsResponse>('/browse-jobs', {
-    params,
-    signal
-  })
-
-  return response.data
 }

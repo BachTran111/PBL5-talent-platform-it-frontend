@@ -1,6 +1,8 @@
 import { BriefcaseBusiness, Building2, CalendarDays, Clock3, MapPin, Wallet } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import Badge from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
+import { translateBrowseValue } from '@/utils/browseJobsI18n'
 
 type JobDetailHeaderProps = {
   title: string
@@ -37,6 +39,7 @@ const JobDetailHeader = ({
   updatedLabel,
   applicantsCount
 }: JobDetailHeaderProps) => {
+  const { t } = useTranslation()
   const badges = [employmentType, workType, experienceLevel, category].filter(Boolean)
 
   return (
@@ -55,9 +58,9 @@ const JobDetailHeader = ({
             <div className='space-y-2.5'>
               <div className='flex flex-wrap gap-2'>
                 {badges.map((badge) => (
-                  <Badge key={badge} label={badge as string} className='rounded-full px-3 py-1.5 text-[11px]' />
+                  <Badge key={badge} label={translateBrowseValue(t, badge as string)} className='rounded-full px-3 py-1.5 text-[11px]' />
                 ))}
-                {isActive ? <Badge label='Active' tone='new' className='rounded-full px-3 py-1.5 text-[11px]' /> : null}
+                {isActive ? <Badge label={t('jobDetail.active')} tone='new' className='rounded-full px-3 py-1.5 text-[11px]' /> : null}
               </div>
 
               <div className='space-y-2'>
@@ -71,7 +74,7 @@ const JobDetailHeader = ({
             <div className='flex flex-wrap items-center gap-x-5 gap-y-3'>
               <span className={metaClassName}>
                 <MapPin className='h-4 w-4 text-violet-500' />
-                {location}
+                  {translateBrowseValue(t, location)}
               </span>
               <span className={metaClassName}>
                 <Wallet className='h-4 w-4 text-violet-500' />
@@ -86,19 +89,19 @@ const JobDetailHeader = ({
               {postedLabel ? (
                 <span className={metaClassName}>
                   <Clock3 className='h-4 w-4 text-violet-500' />
-                  Posted {postedLabel}
+                  {t('jobDetail.posted', { date: translateBrowseValue(t, postedLabel) })}
                 </span>
               ) : null}
               {updatedLabel ? (
                 <span className={metaClassName}>
                   <CalendarDays className='h-4 w-4 text-violet-500' />
-                  Updated {updatedLabel}
+                  {t('jobDetail.updated', { date: updatedLabel })}
                 </span>
               ) : null}
               {typeof applicantsCount === 'number' && applicantsCount > 0 ? (
                 <span className={cn(metaClassName, 'rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5')}>
                   <Building2 className='h-4 w-4 text-violet-500' />
-                  {applicantsCount} applicants
+                  {t('jobDetail.applicants', { count: applicantsCount })}
                 </span>
               ) : null}
             </div>

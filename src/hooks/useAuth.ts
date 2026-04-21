@@ -7,10 +7,6 @@ import type { User } from '@/@types/user'
 export const useAuth = () => {
   const navigate = useNavigate()
   const googleAllowedOrigin = import.meta.env.VITE_GOOGLE_ALLOWED_ORIGIN || 'http://localhost:3000'
-  const apiBaseUrl =
-    (import.meta.env.VITE_BACKEND_API_URL as string)?.replace(/\/$/, '') ||
-    (import.meta.env.VITE_API_URL as string)?.replace(/\/$/, '') ||
-    'http://localhost:4000'
   const googleInitialized = useRef(false)
   const googleScriptLoading = useRef<Promise<void> | null>(null)
   const {
@@ -154,22 +150,6 @@ export const useAuth = () => {
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
   }, [googleAllowedOrigin])
 
-  const startSocialOAuthLogin = useCallback(
-    (provider: 'github' | 'facebook') => {
-      const state = crypto.randomUUID()
-      sessionStorage.setItem(`${provider}_oauth_state`, state)
-
-      const redirectUri = `${window.location.origin}/auth/${provider}/callback`
-      const params = new URLSearchParams({
-        redirect_uri: redirectUri,
-        state
-      })
-
-      window.location.href = `${apiBaseUrl}/auth/${provider}?${params.toString()}`
-    },
-    [apiBaseUrl]
-  )
-
   const handleGithubLogin = useCallback(() => {
     const githubClientId = import.meta.env.VITE_GITHUB_CLIENT_ID as string | undefined
 
@@ -193,8 +173,27 @@ export const useAuth = () => {
   }, [])
 
   const handleFacebookLogin = useCallback(() => {
-    startSocialOAuthLogin('facebook')
-  }, [startSocialOAuthLogin])
+    const facebookAppId = import.meta.env.VITE_FACEBOOK_APP_ID as string | undefined
+
+    if (!facebookAppId) {
+      console.error('[useAuth] Missing VITE_FACEBOOK_APP_ID')
+      return
+    }
+
+    const state = crypto.randomUUID()
+    sessionStorage.setItem('facebook_oauth_state', state)
+
+    const redirectUri = `${window.location.origin}/auth/facebook/callback`
+    const params = new URLSearchParams({
+      client_id: facebookAppId,
+      redirect_uri: redirectUri,
+      scope: 'email,public_profile',
+      response_type: 'code',
+      state
+    })
+
+    window.location.href = `https://www.facebook.com/v19.0/dialog/oauth?${params.toString()}`
+  }, [])
 
   const handleLogout = useCallback(async () => {
     console.log('[useAuth] handleLogout called')
