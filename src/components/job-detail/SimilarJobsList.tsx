@@ -1,4 +1,5 @@
 import { ArrowUpRight, BriefcaseBusiness, Clock3 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import type { CompanyJobSummary } from '@/types/job-detail'
 import { formatRelativeDate } from '@/utils/jobDetail'
@@ -8,6 +9,8 @@ type SimilarJobsListProps = {
 }
 
 const SimilarJobsList = ({ jobs }: SimilarJobsListProps) => {
+  const { t } = useTranslation()
+
   if (jobs.length === 0) {
     return null
   }
@@ -15,7 +18,7 @@ const SimilarJobsList = ({ jobs }: SimilarJobsListProps) => {
   return (
     <section className='rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_18px_56px_rgba(15,23,42,0.06)]'>
       <div className='mb-4 flex items-center justify-between'>
-        <h2 className='text-sm font-semibold uppercase tracking-[0.24em] text-slate-400'>Similar Roles</h2>
+        <h2 className='text-sm font-semibold uppercase tracking-[0.24em] text-slate-400'>{t('jobDetail.similarRoles')}</h2>
       </div>
 
       <div className='space-y-3'>
@@ -31,7 +34,7 @@ const SimilarJobsList = ({ jobs }: SimilarJobsListProps) => {
                   {job.title}
                 </h3>
                 <p className='mt-1 text-sm text-slate-500'>
-                  {job.company?.company_name ?? 'Hiring company'}
+                  {job.company?.company_name ?? t('jobDetail.hiringCompany')}
                   {job.salary ? ` · ${job.salary}` : ''}
                 </p>
 

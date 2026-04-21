@@ -6,27 +6,27 @@ const footerLinks = {
     title: 'For Candidates',
     links: [
       { label: 'Browse Jobs', href: '/jobs' },
-      { label: 'Remote Jobs', href: '/jobs?type=remote' },
-      { label: 'CV Templates', href: '/cv-templates' },
-      { label: 'Salaries', href: '/salaries' }
+      { label: 'Remote Jobs', href: '/jobs' },
+      { label: 'CV Templates', href: '/jobs' },
+      { label: 'Salaries', href: '/jobs' }
     ]
   },
   employers: {
     title: 'For Employers',
     links: [
-      { label: 'Post a Job', href: '/employer/post-job' },
-      { label: 'Candidate Search', href: '/employer/search' },
-      { label: 'Pricing', href: '/pricing' },
-      { label: 'Hiring Solutions', href: '/hiring-solutions' }
+      { label: 'Post a Job', href: '/employer/jobs/create' },
+      { label: 'Candidate Search', href: '/employer/candidates' },
+      { label: 'Pricing', href: '/employer' },
+      { label: 'Hiring Solutions', href: '/employer' }
     ]
   },
   support: {
     title: 'Support',
     links: [
-      { label: 'Help Center', href: '/help' },
-      { label: 'Contact Us', href: '/contact' },
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' }
+      { label: 'Help Center', href: '/jobs' },
+      { label: 'Contact Us', href: '/jobs' },
+      { label: 'Privacy Policy', href: '/jobs' },
+      { label: 'Terms of Service', href: '/jobs' }
     ]
   }
 }

@@ -1,16 +1,19 @@
 import { memo } from 'react'
 import { Bookmark, BriefcaseBusiness, Clock3, MapPin, Wallet } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { OutlineButton, PrimaryButton } from '@/components/ui/Buttons'
 import Tag from '@/components/ui/Tag'
 import type { BrowseJob } from '@/types/browse-jobs'
 import { cn } from '@/lib/utils'
+import { translateBrowseValue } from '@/utils/browseJobsI18n'
 
 type JobCardProps = {
   job: BrowseJob
 }
 
 const JobCard = ({ job }: JobCardProps) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (
@@ -30,13 +33,13 @@ const JobCard = ({ job }: JobCardProps) => {
             <div className='space-y-2.5'>
               <div className='flex flex-wrap items-center gap-2'>
                 <span className='rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600'>
-                  {job.employmentType}
+                  {translateBrowseValue(t, job.employmentType)}
                 </span>
                 <span className='rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700'>
-                  {job.workType}
+                  {translateBrowseValue(t, job.workType)}
                 </span>
                 <span className='rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600'>
-                  {job.experience}
+                  {translateBrowseValue(t, job.experience)}
                 </span>
               </div>
 
@@ -47,12 +50,12 @@ const JobCard = ({ job }: JobCardProps) => {
                 <span className='text-slate-300'>/</span>
                 <span className='inline-flex items-center gap-1.5'>
                   <MapPin className='h-4 w-4 text-slate-400' />
-                  {job.location}
+                  {translateBrowseValue(t, job.location)}
                 </span>
                 <span className='text-slate-300'>/</span>
                 <span className='inline-flex items-center gap-1.5 text-slate-500'>
                   <BriefcaseBusiness className='h-4 w-4 text-slate-400' />
-                  Developer Hiring
+                  {t('browseJobs.jobCard.developerHiring')}
                 </span>
               </div>
             </div>
@@ -63,7 +66,7 @@ const JobCard = ({ job }: JobCardProps) => {
               ))}
               {job.extraSkillsCount ? (
                 <Tag
-                  label={`+${job.extraSkillsCount} skills`}
+                  label={t('browseJobs.jobCard.extraSkills', { count: job.extraSkillsCount })}
                   className='rounded-full border-violet-100 bg-violet-50 px-3 py-1 text-xs text-violet-700'
                 />
               ) : null}
@@ -76,7 +79,7 @@ const JobCard = ({ job }: JobCardProps) => {
               </span>
               <span className='inline-flex items-center gap-2 text-sm text-slate-500'>
                 <Clock3 className='h-[18px] w-[18px] text-slate-400' />
-                {job.postedAt}
+                {translateBrowseValue(t, job.postedAt)}
               </span>
             </div>
           </div>
@@ -85,7 +88,7 @@ const JobCard = ({ job }: JobCardProps) => {
         <div className='flex items-center justify-between gap-3 lg:min-h-[170px] lg:flex-col lg:items-end'>
           <button
             type='button'
-            aria-label='Save job'
+            aria-label={t('browseJobs.jobCard.saveJob')}
             className='flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-400 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700'
           >
             <Bookmark className={cn('h-[18px] w-[18px]', job.isBookmarked ? 'fill-slate-400 text-slate-400' : '')} />
@@ -93,9 +96,11 @@ const JobCard = ({ job }: JobCardProps) => {
 
           <div className='flex flex-col gap-2.5 sm:flex-row lg:flex-col'>
             <OutlineButton onClick={() => navigate(`/jobs/${job.id}`)} className='h-[42px] w-[136px] rounded-xl px-4 text-sm'>
-              View Details
+              {t('browseJobs.jobCard.viewDetails')}
             </OutlineButton>
-            <PrimaryButton className='h-[42px] w-[136px] rounded-xl px-4 text-sm'>Apply</PrimaryButton>
+            <PrimaryButton onClick={() => navigate(`/jobs/${job.id}`)} className='h-[42px] w-[136px] rounded-xl px-4 text-sm'>
+              {t('browseJobs.jobCard.apply')}
+            </PrimaryButton>
           </div>
         </div>
       </div>

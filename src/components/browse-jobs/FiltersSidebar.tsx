@@ -1,14 +1,16 @@
 import { memo } from 'react'
 import { SlidersHorizontal, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import CheckboxFilterItem from '@/components/browse-jobs/CheckboxFilterItem'
 import FilterSelectGroup from '@/components/browse-jobs/FilterSelectGroup'
 import FilterSection from '@/components/browse-jobs/FilterSection'
 import SalaryRangeSlider from '@/components/browse-jobs/SalaryRangeSlider'
 import WorkTypeChips from '@/components/browse-jobs/WorkTypeChips'
-import { jobTypeOptions, postedWithinOptions, programmingLanguageOptions, workTypeOptions, experienceLevelOptions } from '@/data/browse-jobs/filters'
+import { postedWithinOptions, workTypeOptions, experienceLevelOptions } from '@/data/browse-jobs/filters'
 import { useBrowseJobsStore } from '@/store/browseJobsStore'
 import { OutlineButton, PrimaryButton } from '@/components/ui/Buttons'
 import type { FilterOption } from '@/types/browse-jobs'
+import { translateBrowseValue } from '@/utils/browseJobsI18n'
 
 type FiltersSidebarProps = {
   isOpen: boolean
@@ -18,11 +20,14 @@ type FiltersSidebarProps = {
 const shouldUseSelect = (options: FilterOption[], forceSelect = false) => forceSelect || options.length > 5
 
 const FilterSidebarContent = memo(() => {
+  const { t } = useTranslation()
   const selectedLanguages = useBrowseJobsStore((state) => state.selectedLanguages)
   const selectedExperience = useBrowseJobsStore((state) => state.selectedExperience)
   const selectedWorkTypes = useBrowseJobsStore((state) => state.selectedWorkTypes)
   const selectedJobTypes = useBrowseJobsStore((state) => state.selectedJobTypes)
   const selectedPostedWithin = useBrowseJobsStore((state) => state.selectedPostedWithin)
+  const programmingLanguageOptions = useBrowseJobsStore((state) => state.availableProgrammingLanguageOptions)
+  const jobTypeOptions = useBrowseJobsStore((state) => state.availableJobTypeOptions)
   const salaryMin = useBrowseJobsStore((state) => state.salaryMin)
   const salaryMax = useBrowseJobsStore((state) => state.salaryMax)
   const toggleLanguage = useBrowseJobsStore((state) => state.toggleLanguage)
@@ -32,22 +37,45 @@ const FilterSidebarContent = memo(() => {
   const togglePostedWithin = useBrowseJobsStore((state) => state.togglePostedWithin)
   const setSalaryMin = useBrowseJobsStore((state) => state.setSalaryMin)
   const setSalaryMax = useBrowseJobsStore((state) => state.setSalaryMax)
+  const translatedExperienceOptions = experienceLevelOptions.map((option) => ({
+    ...option,
+    label: translateBrowseValue(t, option.value)
+  }))
+  const translatedWorkTypeOptions = workTypeOptions.map((option) => ({
+    ...option,
+    label: translateBrowseValue(t, option.value)
+  }))
+  const translatedJobTypeOptions = jobTypeOptions.map((option) => ({
+    ...option,
+    label: translateBrowseValue(t, option.value)
+  }))
+  const translatedPostedWithinOptions = postedWithinOptions.map((option) => ({
+    ...option,
+    label:
+      option.value === '24h'
+        ? t('browseJobs.values.hoursAgo', { count: 24 })
+        : option.value === '3d'
+          ? t('browseJobs.values.daysAgo', { count: 3 })
+          : t('browseJobs.values.daysAgo', { count: 7 })
+  }))
 
   return (
     <div className='space-y-7'>
       {shouldUseSelect(programmingLanguageOptions, true) ? (
         <FilterSelectGroup
-          title='Programming Languages'
+          title={t('browseJobs.filters.programmingLanguages')}
           options={programmingLanguageOptions}
           selected={selectedLanguages}
-          placeholder='Choose language'
+          placeholder={t('browseJobs.filters.chooseLanguage')}
+          emptyText={t('browseJobs.filters.noMatches')}
+          searchable
           onToggle={toggleLanguage}
         />
       ) : null}
 
-      <FilterSection title='Experience Level'>
+      <FilterSection title={t('browseJobs.filters.experienceLevel')}>
         <div className='space-y-2.5'>
-          {experienceLevelOptions.map((option) => (
+          {translatedExperienceOptions.map((option) => (
             <CheckboxFilterItem
               key={option.value}
               label={option.label}
@@ -58,22 +86,22 @@ const FilterSidebarContent = memo(() => {
         </div>
       </FilterSection>
 
-      <FilterSection title='Work Type'>
-        <WorkTypeChips options={workTypeOptions} selected={selectedWorkTypes} onToggle={toggleWorkType} />
+      <FilterSection title={t('browseJobs.filters.workType')}>
+        <WorkTypeChips options={translatedWorkTypeOptions} selected={selectedWorkTypes} onToggle={toggleWorkType} />
       </FilterSection>
 
       {shouldUseSelect(jobTypeOptions) ? (
         <FilterSelectGroup
-          title='Job Type'
-          options={jobTypeOptions}
+          title={t('browseJobs.filters.jobType')}
+          options={translatedJobTypeOptions}
           selected={selectedJobTypes}
-          placeholder='Choose job type'
+          placeholder={t('browseJobs.filters.chooseJobType')}
           onToggle={toggleJobType}
         />
       ) : (
-        <FilterSection title='Job Type'>
+        <FilterSection title={t('browseJobs.filters.jobType')}>
           <div className='space-y-2.5'>
-            {jobTypeOptions.map((option) => (
+            {translatedJobTypeOptions.map((option) => (
               <CheckboxFilterItem
                 key={option.value}
                 label={option.label}
@@ -88,16 +116,16 @@ const FilterSidebarContent = memo(() => {
 
       {shouldUseSelect(postedWithinOptions) ? (
         <FilterSelectGroup
-          title='Posted Within'
-          options={postedWithinOptions}
+          title={t('browseJobs.filters.postedWithin')}
+          options={translatedPostedWithinOptions}
           selected={selectedPostedWithin}
-          placeholder='Choose time'
+          placeholder={t('browseJobs.filters.chooseTime')}
           onToggle={togglePostedWithin}
         />
       ) : (
-        <FilterSection title='Posted Within'>
+        <FilterSection title={t('browseJobs.filters.postedWithin')}>
           <div className='space-y-2.5'>
-            {postedWithinOptions.map((option) => (
+            {translatedPostedWithinOptions.map((option) => (
               <CheckboxFilterItem
                 key={option.value}
                 label={option.label}
@@ -109,7 +137,7 @@ const FilterSidebarContent = memo(() => {
         </FilterSection>
       )}
 
-      <FilterSection title='Salary Range (Monthly)'>
+      <FilterSection title={t('browseJobs.filters.salaryRange')}>
         <SalaryRangeSlider
           minValue={salaryMin}
           maxValue={salaryMax}
@@ -122,6 +150,7 @@ const FilterSidebarContent = memo(() => {
 })
 
 const FiltersSidebar = ({ isOpen, onClose }: FiltersSidebarProps) => {
+  const { t } = useTranslation()
   const resetFilters = useBrowseJobsStore((state) => state.resetFilters)
 
   return (
@@ -138,7 +167,7 @@ const FiltersSidebar = ({ isOpen, onClose }: FiltersSidebarProps) => {
         <>
           <button
             type='button'
-            aria-label='Close filters'
+            aria-label={t('browseJobs.filters.close')}
             className='fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-[2px] xl:hidden'
             onClick={onClose}
           />
@@ -150,8 +179,8 @@ const FiltersSidebar = ({ isOpen, onClose }: FiltersSidebarProps) => {
                   <SlidersHorizontal className='h-4 w-4' />
                 </span>
                 <div>
-                  <h2 className='text-base font-semibold text-slate-950'>Filters</h2>
-                  <p className='text-sm text-slate-500'>Refine job results</p>
+                  <h2 className='text-base font-semibold text-slate-950'>{t('browseJobs.filters.title')}</h2>
+                  <p className='text-sm text-slate-500'>{t('browseJobs.filters.description')}</p>
                 </div>
               </div>
               <button
@@ -172,10 +201,10 @@ const FiltersSidebar = ({ isOpen, onClose }: FiltersSidebarProps) => {
             <div className='border-t border-slate-200 bg-white px-5 py-4'>
               <div className='flex gap-3'>
                 <OutlineButton className='h-11 flex-1 rounded-xl text-sm' onClick={resetFilters}>
-                  Reset
+                  {t('browseJobs.filters.reset')}
                 </OutlineButton>
                 <PrimaryButton className='h-11 flex-1 rounded-xl text-sm' onClick={onClose}>
-                  Apply Filters
+                  {t('browseJobs.filters.apply')}
                 </PrimaryButton>
               </div>
             </div>

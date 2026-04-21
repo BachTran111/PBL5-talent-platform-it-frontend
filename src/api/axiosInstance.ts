@@ -4,6 +4,10 @@ import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig 
 const apiBaseUrl = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:4000'
 const aiApiBaseUrl = import.meta.env.VITE_AI_API_URL || 'http://127.0.0.1:8000'
 
+type RetriableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean
+}
+
 const attachRequestInterceptors = (instance: AxiosInstance, requestPrefix: string) => {
   instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
@@ -53,15 +57,46 @@ axiosInstance.interceptors.response.use(
   async (error: AxiosError) => {
     const status = error.response?.status
     const requestUrl = error.config?.url
+    const originalRequest = error.config as RetriableRequestConfig | undefined
 
     console.error(`[API Error] Status: ${status}, URL: ${requestUrl}`)
 
     // Nếu lỗi 401 (token hết hạn hoặc không hợp lệ)
     // CHỈ redirect nếu KHÔNG phải đang ở trang login
-    if (status === 401 && !requestUrl?.includes('/auth/login')) {
+    if (
+      status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !requestUrl?.includes('/auth/login') &&
+      !requestUrl?.includes('/auth/refresh-token')
+    ) {
+      const refreshToken = localStorage.getItem('refreshToken')
+
+      if (refreshToken) {
+        try {
+          originalRequest._retry = true
+          const response = await axios.post<{ access_token: string }>(
+            `${apiBaseUrl}/auth/refresh-token`,
+            { refresh_token: refreshToken },
+            { headers: { 'Content-Type': 'application/json' } }
+          )
+
+          localStorage.setItem('accessToken', response.data.access_token)
+
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`
+          }
+
+          return axiosInstance(originalRequest)
+        } catch (refreshError) {
+          console.error('[API] Refresh token failed:', refreshError)
+        }
+      }
+
       console.warn('[API] Unauthorized - Redirecting to login')
       // Xóa token và redirect về trang login
       localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
       localStorage.removeItem('auth-storage')
       window.location.href = '/login'
     }

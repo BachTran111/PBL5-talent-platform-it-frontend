@@ -19,7 +19,7 @@ import JobDetailSkeleton from '@/components/job-detail/JobDetailSkeleton'
 import JobDetailState from '@/components/job-detail/JobDetailState'
 import JobDetailTabs from '@/components/job-detail/JobDetailTabs'
 import SimilarJobsList from '@/components/job-detail/SimilarJobsList'
-import Navbar from '@/components/layout/Navbar'
+import { createApplication } from '@/api/applications'
 import { OutlineButton, PrimaryButton } from '@/components/ui/Buttons'
 import Container from '@/components/ui/Container'
 import Tag from '@/components/ui/Tag'
@@ -42,6 +42,7 @@ import {
 const benefitIcons = [Sparkles, Layers3, CalendarClock, Users]
 
 const sectionTitleClassName = 'text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950'
+const SECTION_SCROLL_OFFSET = 170
 
 type AdditionalInfoItem = {
   label: string
@@ -60,11 +61,15 @@ const JobDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const { job, similarJobs, status, errorMessage, isBookmarked, isBookmarkLoading, canManageBookmarks, isAuthenticated, toggleBookmark, refetch } =
+  const { job, similarJobs, status, errorMessage, isBookmarked, isBookmarkLoading, canManageBookmarks, isAuthenticated, user, toggleBookmark, refetch } =
     useJobDetail(id)
   const [activeSection, setActiveSection] = useState<JobDetailSectionId>('description')
   const [actionNotice, setActionNotice] = useState<string | null>(null)
+  const [isApplying, setIsApplying] = useState(false)
+  const [hasApplied, setHasApplied] = useState(false)
   const sectionRefs = useRef<Partial<Record<JobDetailSectionId, HTMLElement | null>>>({})
+  const isManualSectionScrollRef = useRef(false)
+  const manualSectionScrollTimeoutRef = useRef<number | null>(null)
 
   const browseJob = useMemo(() => browseJobs.find((item) => item.id === id), [id])
   const requirements = useMemo(() => normalizeTextList(job?.requirements), [job?.requirements])
@@ -177,6 +182,7 @@ const JobDetailPage = () => {
       behavior: 'auto'
     })
     setActionNotice(null)
+    setHasApplied(false)
   }, [id])
 
   useEffect(() => {
@@ -196,34 +202,62 @@ const JobDetailPage = () => {
       return
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntry = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((left, right) => Math.abs(left.boundingClientRect.top) - Math.abs(right.boundingClientRect.top))[0]
+    let animationFrame = 0
 
-        if (visibleEntry?.target.id) {
-          setActiveSection(visibleEntry.target.id as JobDetailSectionId)
-        }
-      },
-      {
-        rootMargin: '-20% 0px -55% 0px',
-        threshold: [0.1, 0.35, 0.6]
+    const updateActiveSection = () => {
+      if (isManualSectionScrollRef.current) {
+        return
       }
-    )
 
-    availableSections.forEach((section) => {
-      const element = sectionRefs.current[section.id]
+      const anchorY = 220
+      const sections = availableSections
+        .map((section) => {
+          const element = sectionRefs.current[section.id]
+          return element ? { id: section.id, rect: element.getBoundingClientRect() } : null
+        })
+        .filter(isDefined)
 
-      if (element) {
-        observer.observe(element)
+      const containingSection = sections.find((section) => section.rect.top <= anchorY && section.rect.bottom > anchorY)
+
+      if (containingSection) {
+        setActiveSection(containingSection.id)
+        return
       }
-    })
+
+      const previousSection = sections
+        .filter((section) => section.rect.top <= anchorY)
+        .sort((left, right) => right.rect.top - left.rect.top)[0]
+
+      const nextSection = sections
+        .filter((section) => section.rect.top > anchorY)
+        .sort((left, right) => left.rect.top - right.rect.top)[0]
+
+      setActiveSection(previousSection?.id ?? nextSection?.id ?? availableSections[0].id)
+    }
+
+    const requestUpdate = () => {
+      window.cancelAnimationFrame(animationFrame)
+      animationFrame = window.requestAnimationFrame(updateActiveSection)
+    }
+
+    requestUpdate()
+    window.addEventListener('scroll', requestUpdate, { passive: true })
+    window.addEventListener('resize', requestUpdate)
 
     return () => {
-      observer.disconnect()
+      window.cancelAnimationFrame(animationFrame)
+      window.removeEventListener('scroll', requestUpdate)
+      window.removeEventListener('resize', requestUpdate)
     }
   }, [availableSections, status])
+
+  useEffect(() => {
+    return () => {
+      if (manualSectionScrollTimeoutRef.current) {
+        window.clearTimeout(manualSectionScrollTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const scrollToSection = (sectionId: JobDetailSectionId) => {
     const target = sectionRefs.current[sectionId]
@@ -232,12 +266,23 @@ const JobDetailPage = () => {
       return
     }
 
-    const y = target.getBoundingClientRect().top + window.scrollY - 110
+    setActiveSection(sectionId)
+    isManualSectionScrollRef.current = true
+
+    if (manualSectionScrollTimeoutRef.current) {
+      window.clearTimeout(manualSectionScrollTimeoutRef.current)
+    }
+
+    const y = target.getBoundingClientRect().top + window.scrollY - SECTION_SCROLL_OFFSET
 
     window.scrollTo({
       top: y,
       behavior: 'smooth'
     })
+
+    manualSectionScrollTimeoutRef.current = window.setTimeout(() => {
+      isManualSectionScrollRef.current = false
+    }, 800)
   }
 
   const handleBookmark = async () => {
@@ -271,11 +316,10 @@ const JobDetailPage = () => {
     setActionNotice(result.message ?? (result.bookmarked ? 'Job saved to your bookmarks.' : 'Job removed from your bookmarks.'))
   }
 
-  const handleApply = () => {
+  const handleApply = async () => {
     setActionNotice(null)
 
-    if (job?.company?.company_website_url) {
-      window.open(job.company.company_website_url, '_blank', 'noopener,noreferrer')
+    if (!job?.id) {
       return
     }
 
@@ -288,35 +332,78 @@ const JobDetailPage = () => {
       return
     }
 
-    setActionNotice('Direct application flow is being finalized. For now, you can save this job and review the company profile for the next step.')
+    if (user?.role !== 'SEEKER') {
+      setActionNotice('Only seeker accounts can apply directly. Please switch to a seeker profile to apply for this job.')
+      return
+    }
+
+    if (hasApplied) {
+      setActionNotice('Bạn đã ứng tuyển vị trí này.')
+      return
+    }
+
+    setIsApplying(true)
+
+    try {
+      await createApplication({ jobId: job.id })
+      setHasApplied(true)
+      setActionNotice('Application submitted successfully. The employer can now review your profile.')
+    } catch (error) {
+      const message = error && typeof error === 'object' && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+        : null
+      const status = error && typeof error === 'object' && 'response' in error
+        ? (error as { response?: { status?: number } }).response?.status
+        : null
+
+      if (status === 409) {
+        setHasApplied(true)
+        setActionNotice('Bạn đã ứng tuyển vị trí này.')
+        return
+      }
+
+      setActionNotice(message || 'We could not submit your application right now. Please try again in a moment.')
+    } finally {
+      setIsApplying(false)
+    }
   }
 
   const handleCopyLink = async () => {
     const currentUrl = window.location.href
+    setActionNotice(null)
 
     try {
       await navigator.clipboard.writeText(currentUrl)
-      setActionNotice('Job link copied to clipboard.')
+      window.setTimeout(() => setActionNotice('Job link copied to clipboard.'), 0)
     } catch {
-      setActionNotice('We could not copy the link automatically. Please copy the URL from your browser.')
+      window.setTimeout(() => setActionNotice('We could not copy the link automatically. Please copy the URL from your browser.'), 0)
     }
   }
 
   const handleShareLinkedIn = () => {
     const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`
-    window.open(shareUrl, '_blank', 'noopener,noreferrer')
+    const popup = window.open(shareUrl, '_blank', 'noopener,noreferrer')
+    setActionNotice(null)
+
+    if (!popup) {
+      window.setTimeout(() => setActionNotice('Your browser blocked the LinkedIn share window. Please allow popups and try again.'), 0)
+    }
   }
 
   const handleShareEmail = () => {
     const subject = `Job opportunity: ${job?.title ?? 'Open role'}`
     const body = `Take a look at this role: ${window.location.href}`
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    const link = document.createElement('a')
+    link.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    link.style.display = 'none'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   if (status === 'loading') {
     return (
       <div className='min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.10),_transparent_28%),linear-gradient(180deg,#f7f4ff_0%,#fafafc_100%)]'>
-        <Navbar />
         <Container className='max-w-[1380px] py-6 sm:py-8'>
           <JobDetailSkeleton />
         </Container>
@@ -327,7 +414,6 @@ const JobDetailPage = () => {
   if (status === 'error') {
     return (
       <div className='min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.10),_transparent_28%),linear-gradient(180deg,#f7f4ff_0%,#fafafc_100%)]'>
-        <Navbar />
         <Container className='max-w-[1380px] py-10 sm:py-14'>
           <JobDetailState
             tone='error'
@@ -343,7 +429,6 @@ const JobDetailPage = () => {
   if (!job || status === 'not-found') {
     return (
       <div className='min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.10),_transparent_28%),linear-gradient(180deg,#f7f4ff_0%,#fafafc_100%)]'>
-        <Navbar />
         <Container className='max-w-[1380px] py-10 sm:py-14'>
           <JobDetailState
             title='This job is no longer available'
@@ -356,8 +441,6 @@ const JobDetailPage = () => {
 
   return (
     <div className='min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.10),_transparent_28%),linear-gradient(180deg,#f7f4ff_0%,#fafafc_100%)] pb-28 lg:pb-10'>
-      <Navbar />
-
       <Container className='max-w-[1380px] py-5 sm:py-6'>
         <div className='space-y-6'>
           <nav aria-label='Breadcrumb' className='overflow-x-auto'>
@@ -379,7 +462,7 @@ const JobDetailPage = () => {
           </nav>
 
           <div className='grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]'>
-            <main className='space-y-6'>
+            <main className='space-y-8'>
               <div className='flex items-center'>
                 <Link
                   to='/jobs'
@@ -408,7 +491,7 @@ const JobDetailPage = () => {
               />
 
               {availableSections.length > 0 ? (
-                <div className='sticky top-[78px] z-30 py-1'>
+                <div className='sticky top-[78px] z-30 py-2'>
                   <JobDetailTabs sections={availableSections} activeSection={activeSection} onNavigate={scrollToSection} />
                 </div>
               ) : null}
@@ -568,6 +651,8 @@ const JobDetailPage = () => {
               <JobActionsCard
                 isBookmarked={isBookmarked}
                 isBookmarkLoading={isBookmarkLoading}
+                isApplying={isApplying}
+                hasApplied={hasApplied}
                 onApply={handleApply}
                 onToggleBookmark={handleBookmark}
                 onCopyLink={handleCopyLink}
@@ -605,8 +690,15 @@ const JobDetailPage = () => {
           >
             {isBookmarked ? 'Saved' : 'Save Job'}
           </OutlineButton>
-          <PrimaryButton onClick={handleApply} className='h-12 flex-[1.3] rounded-2xl'>
-            Apply Now
+          <PrimaryButton
+            onClick={handleApply}
+            disabled={isApplying || hasApplied}
+            className={cn(
+              'h-12 flex-[1.3] rounded-2xl disabled:cursor-not-allowed disabled:opacity-70',
+              hasApplied && 'bg-emerald-600 shadow-[0_14px_32px_rgba(16,185,129,0.22)] hover:bg-emerald-600'
+            )}
+          >
+            {isApplying ? 'Applying...' : hasApplied ? 'Applied' : 'Apply Now'}
           </PrimaryButton>
         </div>
       </div>

@@ -57,7 +57,7 @@ const SocialCallback = () => {
       try {
         const data = typedProvider === 'github' ? await githubCallbackApi(code) : await facebookCallbackApi(code)
 
-        setAuth(data.user, data.access_token)
+        setAuth(data.user, data.access_token, data.refresh_token)
         redirectByRole(data.user)
       } catch (callbackError: unknown) {
         console.error('[SocialCallback] Error:', callbackError)

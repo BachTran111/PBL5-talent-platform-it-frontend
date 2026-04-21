@@ -14,11 +14,17 @@ const EMPTY_RESULTS: BrowseJobsResponse = {
     totalPages: 1,
     from: 0,
     to: 0
+  },
+  filters: {
+    programmingLanguages: [],
+    jobTypes: [],
+    locations: []
   }
 }
 
 export const useBrowseJobs = () => {
   const searchQuery = useBrowseJobsStore((state) => state.searchQuery)
+  const selectedLocation = useBrowseJobsStore((state) => state.selectedLocation)
   const selectedLanguages = useBrowseJobsStore((state) => state.selectedLanguages)
   const selectedExperience = useBrowseJobsStore((state) => state.selectedExperience)
   const selectedWorkTypes = useBrowseJobsStore((state) => state.selectedWorkTypes)
@@ -34,6 +40,7 @@ export const useBrowseJobs = () => {
   const queryParams = useMemo(
     () => ({
       searchQuery: debouncedSearchQuery,
+      selectedLocation,
       selectedLanguages,
       selectedExperience,
       selectedWorkTypes,
@@ -48,6 +55,7 @@ export const useBrowseJobs = () => {
       currentPage,
       debouncedSearchQuery,
       pageSize,
+      selectedLocation,
       salaryMax,
       salaryMin,
       selectedExperience,
@@ -77,6 +85,7 @@ export const useBrowseJobs = () => {
     fetchBrowseJobs(queryParams, controller.signal)
       .then((response) => {
         setData(response)
+        useBrowseJobsStore.getState().setAvailableFilterOptions(response.filters)
         hasResolvedOnceRef.current = true
 
         if (response.pagination.currentPage !== currentPage) {
@@ -106,10 +115,10 @@ export const useBrowseJobs = () => {
 
   const activeFilters = useMemo(
     () =>
-      [...selectedWorkTypes, ...selectedExperience, ...selectedLanguages, ...selectedJobTypes].filter(
-        (value, index, values) => values.indexOf(value) === index
-      ),
-    [selectedExperience, selectedJobTypes, selectedLanguages, selectedWorkTypes]
+      [selectedLocation, ...selectedWorkTypes, ...selectedExperience, ...selectedLanguages, ...selectedJobTypes]
+        .filter(Boolean)
+        .filter((value, index, values) => values.indexOf(value) === index),
+    [selectedExperience, selectedJobTypes, selectedLanguages, selectedLocation, selectedWorkTypes]
   )
 
   return {

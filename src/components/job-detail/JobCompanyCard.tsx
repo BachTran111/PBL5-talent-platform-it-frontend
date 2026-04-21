@@ -1,4 +1,5 @@
 import { ArrowUpRight, Building2, Globe, MapPin, Users } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { OutlineButton } from '@/components/ui/Buttons'
 import { cn } from '@/lib/utils'
 
@@ -25,6 +26,7 @@ const JobCompanyCard = ({
   companyWebsiteUrl,
   onFallbackViewCompany
 }: JobCompanyCardProps) => {
+  const { t } = useTranslation()
   const meta = [companyIndustry, companyType].filter(Boolean).join(' · ')
 
   return (
@@ -81,12 +83,12 @@ const JobCompanyCard = ({
             'mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-700 transition hover:border-violet-300 hover:bg-violet-100 hover:text-violet-800'
           )}
         >
-          View Company
+          {t('jobDetail.viewCompany')}
           <ArrowUpRight className='h-4 w-4' />
         </a>
       ) : (
         <OutlineButton onClick={onFallbackViewCompany} className='mt-5 w-full rounded-2xl'>
-          View Company
+          {t('jobDetail.viewCompany')}
         </OutlineButton>
       )}
     </section>

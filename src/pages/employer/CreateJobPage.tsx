@@ -1,4 +1,5 @@
 import { ArrowLeft } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -7,27 +8,29 @@ import EmployerSectionCard from '@/components/employer/EmployerSectionCard'
 import CreateJobForm from '@/components/employer/CreateJobForm'
 
 const CreateJobPage = () => {
+  const { t } = useTranslation()
+
   return (
-    <div className='space-y-6'>
+    <div className='min-w-0 space-y-6'>
       <div className='flex items-center gap-4'>
-        <Link to='/employer/jobs'>
-          <Button variant='outline' size='sm' className='rounded-lg'>
+        <Link to='/employer/jobs' className='w-full sm:w-auto'>
+          <Button variant='outline' size='sm' className='w-full rounded-lg sm:w-auto'>
             <ArrowLeft className='h-4 w-4' />
-            Back to Jobs
+            {t('employer.jobs.create.back')}
           </Button>
         </Link>
       </div>
 
       <EmployerPageHeader
-        eyebrow='Create new posting'
-        title='Add New Job Position'
-        description='Fill in the details below to create a new job posting. Your position will be published immediately to candidate pool.'
+        eyebrow={t('employer.jobs.create.eyebrow')}
+        title={t('employer.jobs.create.title')}
+        description={t('employer.jobs.create.description')}
       />
 
       <EmployerSectionCard
-        title='Job Details'
-        description='Enter all required information for your job posting.'
-        contentClassName='max-w-3xl'
+        title={t('employer.jobs.create.sectionTitle')}
+        description={t('employer.jobs.create.sectionDescription')}
+        contentClassName='w-full max-w-3xl'
       >
         <CreateJobForm />
       </EmployerSectionCard>
