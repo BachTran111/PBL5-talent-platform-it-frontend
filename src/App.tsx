@@ -3,12 +3,13 @@ import './App.css'
 import { AppRoutes } from './routes/AppRoutes'
 import ChatWidget from './components/chatbot/ChatbotWidget'
 import ChatWidgetToggle from './components/chatbot/ChatbotWidgetToggle'
+import { ScrollToTop } from './hooks/useScrollToTop'
 
 const ChatOverlay = () => {
   const { pathname } = useLocation()
   // Ẩn widget khi đang ở trang chat full-screen
 
-  if (pathname === '/chatbot' || pathname === '/' || pathname === '/jobs') return null
+  if (pathname === '/chatbot') return null
 
   return (
     <>
@@ -33,6 +34,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AppRoutes />
       <ChatOverlay />
     </BrowserRouter>

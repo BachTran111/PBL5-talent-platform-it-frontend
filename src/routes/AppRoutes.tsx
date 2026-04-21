@@ -2,11 +2,13 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { ProtectedRoute } from './ProtectedRoute'
 import MainLayout from '@/components/layout/MainLayout'
+import ChatPage from '@/pages/chatbot/ChatbotPage'
+import CompanyListPage from '@/pages/company/CompanyListPage'
+import CompanyDetailPage from '@/pages/company/CompanyDetailPage'
 import BrowseJobsPage from '@/pages/BrowseJobsPage'
 import HomePage from '@/pages/HomePage'
 import JobDetailPage from '@/pages/JobDetailPage'
 import ChatbotPage from '@/pages/chatbot/ChatbotPage'
-import ChatPage from '@/pages/chat/ChatPage'
 import CategoriesPage from '@/pages/CategoriesPage'
 import EmployerOverviewPage from '@/pages/employer/OverviewPage'
 import EmployerJobsPage from '@/pages/employer/JobsPage'
@@ -53,6 +55,8 @@ export function AppRoutes() {
           <Route path='/reset-password/:token' element={<ResetPasswordPage />} />
           <Route path='/auth/reset-password' element={<ResetPasswordPage />} />
           <Route path='/auth/reset-password/:token' element={<ResetPasswordPage />} />
+          <Route path='/companies' element={<CompanyListPage />} />
+          <Route path='/companies/:id' element={<CompanyDetailPage />} />
           <Route path='/chat' element={<ChatPage></ChatPage>}></Route>
 
           {/* Candidate/Seeker Routes */}

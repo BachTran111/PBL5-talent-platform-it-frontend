@@ -17,9 +17,11 @@ import JobCompanyCard from '@/components/job-detail/JobCompanyCard'
 import JobDetailHeader from '@/components/job-detail/JobDetailHeader'
 import JobDetailSkeleton from '@/components/job-detail/JobDetailSkeleton'
 import JobDetailState from '@/components/job-detail/JobDetailState'
-import JobDetailTabs from '@/components/job-detail/JobDetailTabs'
+import JobDetailTabs from '@/components/job-detail/JobDetailTabs' 
 import SimilarJobsList from '@/components/job-detail/SimilarJobsList'
+
 import { createApplication } from '@/api/applications'
+
 import { OutlineButton, PrimaryButton } from '@/components/ui/Buttons'
 import Container from '@/components/ui/Container'
 import Tag from '@/components/ui/Tag'
@@ -60,7 +62,7 @@ const isDefined = <T,>(value: T | null | undefined): value is T => value !== nul
 const JobDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const location = useLocation()
+  const location = useLocation()      
   const { job, similarJobs, status, errorMessage, isBookmarked, isBookmarkLoading, canManageBookmarks, isAuthenticated, user, toggleBookmark, refetch } =
     useJobDetail(id)
   const [activeSection, setActiveSection] = useState<JobDetailSectionId>('description')
@@ -78,7 +80,10 @@ const JobDetailPage = () => {
   const techStack = useMemo(() => extractTechStack(job, browseJob), [browseJob, job])
   const salaryLabel = useMemo(() => formatSalary(job, browseJob), [browseJob, job])
   const locationLabel = useMemo(() => getJobLocation(job, browseJob), [browseJob, job])
-  const companyInitials = useMemo(() => getCompanyInitials(job?.company?.company_name ?? browseJob?.company), [browseJob?.company, job?.company?.company_name])
+  const companyInitials = useMemo(
+    () => getCompanyInitials(job?.company?.company_name ?? browseJob?.company),
+    [browseJob?.company, job?.company?.company_name]
+  )
   const companyLocation = useMemo(
     () => [job?.company?.city, job?.company?.country].filter(Boolean).join(', ') || browseJob?.location || null,
     [browseJob?.location, job?.company?.city, job?.company?.country]
@@ -153,7 +158,14 @@ const JobDetailPage = () => {
             }
           : null
       ].filter(isDefined),
-    [additionalInfo.length, benefits.length, bulletPoints.length, paragraphs.length, requirements.length, techStack.length]
+    [
+      additionalInfo.length,
+      benefits.length,
+      bulletPoints.length,
+      paragraphs.length,
+      requirements.length,
+      techStack.length
+    ]
   )
 
   const sectionIdSet = useMemo(() => new Set(availableSections.map((section) => section.id)), [availableSections])
@@ -181,6 +193,7 @@ const JobDetailPage = () => {
       top: 0,
       behavior: 'auto'
     })
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActionNotice(null)
     setHasApplied(false)
   }, [id])
@@ -193,6 +206,7 @@ const JobDetailPage = () => {
     const hasCurrentSection = availableSections.some((section) => section.id === activeSection)
 
     if (!hasCurrentSection) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveSection(availableSections[0].id)
     }
   }, [activeSection, availableSections])
@@ -313,7 +327,9 @@ const JobDetailPage = () => {
       return
     }
 
-    setActionNotice(result.message ?? (result.bookmarked ? 'Job saved to your bookmarks.' : 'Job removed from your bookmarks.'))
+    setActionNotice(
+      result.message ?? (result.bookmarked ? 'Job saved to your bookmarks.' : 'Job removed from your bookmarks.')
+    )
   }
 
   const handleApply = async () => {
@@ -519,7 +535,10 @@ const JobDetailPage = () => {
                         <h3 className='text-lg font-semibold text-slate-900'>Responsibilities</h3>
                         <ul className='mt-4 space-y-3'>
                           {bulletPoints.map((item) => (
-                            <li key={item} className='flex items-start gap-3 text-sm leading-7 text-slate-700 sm:text-[15px]'>
+                            <li
+                              key={item}
+                              className='flex items-start gap-3 text-sm leading-7 text-slate-700 sm:text-[15px]'
+                            >
                               <CircleCheckBig className='mt-1 h-5 w-5 shrink-0 text-violet-600' />
                               <span>{item}</span>
                             </li>
@@ -671,7 +690,9 @@ const JobDetailPage = () => {
                 companyOverview={companyOverview}
                 companyWebsiteUrl={job.company?.company_website_url}
                 onFallbackViewCompany={() =>
-                  setActionNotice('A dedicated company profile route is not available yet. You can still use the company website or save this job for later.')
+                  setActionNotice(
+                    'A dedicated company profile route is not available yet. You can still use the company website or save this job for later.'
+                  )
                 }
               />
 
@@ -686,7 +707,10 @@ const JobDetailPage = () => {
           <OutlineButton
             onClick={handleBookmark}
             disabled={isBookmarkLoading}
-            className={cn('h-12 flex-1 rounded-2xl border-slate-200 text-slate-700', isBookmarked ? 'border-violet-200 bg-violet-50 text-violet-700' : '')}
+            className={cn(
+              'h-12 flex-1 rounded-2xl border-slate-200 text-slate-700',
+              isBookmarked ? 'border-violet-200 bg-violet-50 text-violet-700' : ''
+            )}
           >
             {isBookmarked ? 'Saved' : 'Save Job'}
           </OutlineButton>
