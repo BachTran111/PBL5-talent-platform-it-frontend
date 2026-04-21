@@ -1,4 +1,5 @@
 import type { JobDetailSectionId } from '@/types/job-detail'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 type JobDetailTabsProps = {
@@ -11,16 +12,19 @@ type JobDetailTabsProps = {
 }
 
 const JobDetailTabs = ({ sections, activeSection, onNavigate }: JobDetailTabsProps) => {
+  const { t } = useTranslation()
+
   return (
-    <nav aria-label='Job detail sections' className='overflow-x-auto'>
-      <div className='flex min-w-max items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-[0_12px_32px_rgba(15,23,42,0.04)]'>
+    <nav aria-label={t('jobDetail.sections')} className='overflow-x-auto'>
+      <div className='grid min-w-max grid-flow-col auto-cols-[minmax(8.75rem,1fr)] items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-[0_12px_32px_rgba(15,23,42,0.04)]'>
         {sections.map((section) => (
           <button
             key={section.id}
             type='button'
+            aria-current={activeSection === section.id ? 'true' : undefined}
             onClick={() => onNavigate(section.id)}
             className={cn(
-              'rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300',
+              'h-12 w-full rounded-xl px-4 text-center text-sm font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300',
               activeSection === section.id
                 ? 'bg-violet-600 text-white shadow-[0_12px_24px_rgba(124,58,237,0.22)]'
                 : 'text-slate-600 hover:bg-violet-50 hover:text-violet-700'

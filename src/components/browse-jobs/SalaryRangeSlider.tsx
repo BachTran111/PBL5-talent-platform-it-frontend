@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { useTranslation } from 'react-i18next'
 
 type SalaryRangeSliderProps = {
   minValue: string
@@ -8,11 +9,13 @@ type SalaryRangeSliderProps = {
 }
 
 const SalaryRangeSlider = ({ minValue, maxValue, onMinChange, onMaxChange }: SalaryRangeSliderProps) => {
+  const { t } = useTranslation()
+
   return (
     <div className='space-y-3.5'>
       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
         <label className='space-y-1.5'>
-          <span className='text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400'>From</span>
+          <span className='text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400'>{t('browseJobs.filters.from')}</span>
           <div className='flex items-center rounded-2xl border border-slate-200 bg-white px-3.5 focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-100'>
             <span className='text-sm text-slate-400'>$</span>
             <input
@@ -28,7 +31,7 @@ const SalaryRangeSlider = ({ minValue, maxValue, onMinChange, onMaxChange }: Sal
         </label>
 
         <label className='space-y-1.5'>
-          <span className='text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400'>To</span>
+          <span className='text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400'>{t('browseJobs.filters.to')}</span>
           <div className='flex items-center rounded-2xl border border-slate-200 bg-white px-3.5 focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-100'>
             <span className='text-sm text-slate-400'>$</span>
             <input
@@ -44,7 +47,7 @@ const SalaryRangeSlider = ({ minValue, maxValue, onMinChange, onMaxChange }: Sal
         </label>
       </div>
 
-      <p className='text-xs leading-5 text-slate-500'>Enter your preferred salary range to narrow down matching jobs.</p>
+      <p className='text-xs leading-5 text-slate-500'>{t('browseJobs.filters.salaryHelp')}</p>
     </div>
   )
 }

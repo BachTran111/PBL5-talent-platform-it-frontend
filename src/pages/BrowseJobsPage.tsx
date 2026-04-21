@@ -1,5 +1,6 @@
 import { memo, useCallback, useState } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import ActiveFiltersBar from '@/components/browse-jobs/ActiveFiltersBar'
 import CareerTipsCard from '@/components/browse-jobs/CareerTipsCard'
 import EmptyState from '@/components/browse-jobs/EmptyState'
@@ -18,12 +19,18 @@ import { useBrowseJobsStore } from '@/store/browseJobsStore'
 
 const BrowseJobsSearch = memo(() => {
   const searchQuery = useBrowseJobsStore((state) => state.searchQuery)
+  const selectedLocation = useBrowseJobsStore((state) => state.selectedLocation)
+  const locationOptions = useBrowseJobsStore((state) => state.availableLocationOptions)
   const setSearchQuery = useBrowseJobsStore((state) => state.setSearchQuery)
+  const setSelectedLocation = useBrowseJobsStore((state) => state.setSelectedLocation)
 
   return (
     <JobsSearchBar
       searchQuery={searchQuery}
+      selectedLocation={selectedLocation}
+      locationOptions={locationOptions}
       onSearchChange={setSearchQuery}
+      onLocationChange={setSelectedLocation}
       compact
       className='w-full max-w-3xl bg-white/90'
     />
@@ -83,6 +90,7 @@ const BrowseJobsResults = memo(() => {
 })
 
 const BrowseJobsPage = () => {
+  const { t } = useTranslation()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   return (
@@ -99,7 +107,7 @@ const BrowseJobsPage = () => {
             className='inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:border-violet-200 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-200'
           >
             <SlidersHorizontal className='h-4 w-4' />
-            Filters
+            {t('browseJobs.filters.open')}
           </button>
         </div>
 

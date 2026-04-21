@@ -1,10 +1,10 @@
 import type { FilterOption } from '@/types/browse-jobs'
 
 export const programmingLanguageOptions: FilterOption[] = [
-  { label: 'JavaScript', value: 'JavaScript', count: '1.2k' },
-  { label: 'Python', value: 'Python', count: '840' },
-  { label: 'Go Lang', value: 'Go Lang', count: '320' },
-  { label: 'Java', value: 'Java', count: '510' }
+  { label: 'JavaScript', value: 'JavaScript' },
+  { label: 'Python', value: 'Python' },
+  { label: 'Go', value: 'Go' },
+  { label: 'Java', value: 'Java' }
 ]
 
 export const experienceLevelOptions: FilterOption[] = [
@@ -20,9 +20,9 @@ export const workTypeOptions: FilterOption[] = [
 ]
 
 export const jobTypeOptions: FilterOption[] = [
-  { label: 'Full-time', value: 'Full-time', count: '920' },
-  { label: 'Contract', value: 'Contract', count: '186' },
-  { label: 'Part-time', value: 'Part-time', count: '142' }
+  { label: 'Full-time', value: 'Full-time' },
+  { label: 'Contract', value: 'Contract' },
+  { label: 'Part-time', value: 'Part-time' }
 ]
 
 export const postedWithinOptions: FilterOption[] = [

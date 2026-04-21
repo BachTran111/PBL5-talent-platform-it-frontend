@@ -9,4 +9,19 @@ export interface User {
   phone?: string
   registration_date: string
   gender?: string
+  employee?: {
+    employee_id: number
+    role: string
+    joined_date: string | null
+    company: {
+      company_id: number
+      company_name: string
+      company_email?: string | null
+      company_image?: string | null
+      city?: string | null
+      company_website_url?: string | null
+      company_industry?: string | null
+      company_size?: string | null
+    }
+  } | null
 }

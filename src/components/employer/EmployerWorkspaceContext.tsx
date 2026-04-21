@@ -46,11 +46,7 @@ const initialMockJobs: EmployerJobItem[] = [
     updatedDate: now.toISOString(),
     applicantCount: 14,
     category: { category_id: 1, name: 'Design' },
-    jobType: { job_type_id: 1, job_type: 'Full-time' },
-    requirements: undefined,
-    description: undefined,
-    numberOfPositions: 0,
-    experienceRequired: ''
+    jobType: { job_type_id: 1, job_type: 'Full-time' }
   },
   {
     id: 9002,
@@ -64,11 +60,7 @@ const initialMockJobs: EmployerJobItem[] = [
     updatedDate: now.toISOString(),
     applicantCount: 9,
     category: { category_id: 2, name: 'Quality Assurance' },
-    jobType: { job_type_id: 1, job_type: 'Full-time' },
-    requirements: undefined,
-    description: undefined,
-    numberOfPositions: 0,
-    experienceRequired: ''
+    jobType: { job_type_id: 1, job_type: 'Full-time' }
   },
   {
     id: 9003,
@@ -82,11 +74,7 @@ const initialMockJobs: EmployerJobItem[] = [
     updatedDate: now.toISOString(),
     applicantCount: 22,
     category: { category_id: 3, name: 'Engineering' },
-    jobType: { job_type_id: 1, job_type: 'Full-time' },
-    requirements: undefined,
-    description: undefined,
-    numberOfPositions: 0,
-    experienceRequired: ''
+    jobType: { job_type_id: 1, job_type: 'Full-time' }
   },
   {
     id: 9004,
@@ -100,11 +88,7 @@ const initialMockJobs: EmployerJobItem[] = [
     updatedDate: now.toISOString(),
     applicantCount: 31,
     category: { category_id: 3, name: 'Engineering' },
-    jobType: { job_type_id: 1, job_type: 'Full-time' },
-    requirements: undefined,
-    description: undefined,
-    numberOfPositions: 0,
-    experienceRequired: ''
+    jobType: { job_type_id: 1, job_type: 'Full-time' }
   },
   {
     id: 9005,
@@ -118,11 +102,7 @@ const initialMockJobs: EmployerJobItem[] = [
     updatedDate: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 5).toISOString(),
     applicantCount: 5,
     category: { category_id: 4, name: 'Infrastructure' },
-    jobType: { job_type_id: 1, job_type: 'Full-time' },
-    requirements: undefined,
-    description: undefined,
-    numberOfPositions: 0,
-    experienceRequired: ''
+    jobType: { job_type_id: 1, job_type: 'Full-time' }
   }
 ]
 

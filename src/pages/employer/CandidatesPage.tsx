@@ -1,4 +1,5 @@
 import { Download } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import EmployerPageHeader from '@/components/employer/EmployerPageHeader'
@@ -8,21 +9,31 @@ import EmployerEmptyState from '@/components/employer/EmployerEmptyState'
 import { useEmployerCandidates } from '@/hooks/useEmployerData'
 
 const CandidatesPage = () => {
+  const { i18n, t } = useTranslation()
   const { data, isLoading, error } = useEmployerCandidates()
+  const locale = i18n.language.startsWith('vi') ? 'vi-VN' : 'en-US'
 
   const handleExport = () => {
     if (!data?.candidates) return
 
     const csv = [
-      ['Candidate Name', 'Email', 'Phone', 'Job Applied', 'Stage', 'Skills', 'Applied Date'],
+      [
+        t('employer.candidates.table.candidateName'),
+        t('employer.candidates.table.email'),
+        t('employer.candidates.modal.phone'),
+        t('employer.candidates.table.jobTitle'),
+        t('employer.candidates.table.stage'),
+        t('employer.candidates.table.skills'),
+        t('employer.candidates.table.appliedDate')
+      ],
       ...data.candidates.map((candidate) => [
         candidate.seeker.fullName,
         candidate.seeker.email,
         candidate.seeker.phone || '-',
         candidate.job.title,
-        candidate.stage || '-',
+        candidate.stage ? t(`employer.candidates.status.${candidate.stage}`, { defaultValue: candidate.stage }) : '-',
         candidate.seeker.skills.join('; '),
-        new Date(candidate.appliedAt).toLocaleDateString('en-US')
+        new Date(candidate.appliedAt).toLocaleDateString(locale)
       ])
     ]
       .map((row) => row.map((cell) => `"${cell}"`).join(','))
@@ -40,30 +51,33 @@ const CandidatesPage = () => {
   }
 
   const actionButtons = (
-    <Button variant='outline' size='sm' onClick={handleExport} className='rounded-lg'>
+    <Button variant='outline' size='sm' onClick={handleExport} className='w-full rounded-lg sm:w-auto'>
       <Download className='h-4 w-4' />
-      Export
+      {t('employer.candidates.page.export')}
     </Button>
   )
 
   return (
-    <div className='space-y-6'>
+    <div className='min-w-0 space-y-6'>
       <EmployerPageHeader
-        eyebrow='Candidate pipeline'
-        title='Submitted Candidates'
-        description='Aggregated from applications and candidate profiles related to company jobs.'
+        eyebrow={t('employer.candidates.page.eyebrow')}
+        title={t('employer.candidates.page.title')}
+        description={t('employer.candidates.page.description')}
       />
 
       <EmployerSectionCard
-        title={`Candidate List${data ? ` • ${data.total}` : ''}`}
-        description='Track current stage, key skills, and upcoming interviews.'
+        title={`${t('employer.candidates.page.sectionTitle')}${data ? ` - ${data.total}` : ''}`}
+        description={t('employer.candidates.page.sectionDescription')}
         action={actionButtons}
         contentClassName='space-y-4'
       >
         {isLoading ? (
-          <EmployerEmptyState title='Loading candidates' description='System is fetching the latest candidate list.' />
+          <EmployerEmptyState
+            title={t('employer.candidates.page.loadingTitle')}
+            description={t('employer.candidates.page.loadingDescription')}
+          />
         ) : null}
-        {error ? <EmployerEmptyState title='Failed to load candidates' description={error} /> : null}
+        {error ? <EmployerEmptyState title={t('employer.candidates.page.failedTitle')} description={error} /> : null}
         {data ? <EmployerCandidateList candidates={data.candidates} /> : null}
       </EmployerSectionCard>
     </div>

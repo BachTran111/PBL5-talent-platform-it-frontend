@@ -32,6 +32,7 @@ export type FilterOption = {
 
 export type BrowseJobsFilters = {
   searchQuery: string
+  selectedLocation: string
   selectedLanguages: string[]
   selectedExperience: string[]
   selectedWorkTypes: string[]
@@ -54,7 +55,14 @@ export type BrowseJobsPagination = {
   to: number
 }
 
+export type BrowseJobsFilterOptions = {
+  programmingLanguages: FilterOption[]
+  jobTypes: FilterOption[]
+  locations: FilterOption[]
+}
+
 export type BrowseJobsResponse = {
   jobs: BrowseJob[]
   pagination: BrowseJobsPagination
+  filters: BrowseJobsFilterOptions
 }

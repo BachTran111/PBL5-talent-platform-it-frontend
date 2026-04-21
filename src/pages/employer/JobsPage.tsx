@@ -1,4 +1,5 @@
 import { Plus, Download } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -9,21 +10,31 @@ import EmployerEmptyState from '@/components/employer/EmployerEmptyState'
 import { useEmployerJobs } from '@/hooks/useEmployerData'
 
 const JobsPage = () => {
+  const { i18n, t } = useTranslation()
   const { data, isLoading, error } = useEmployerJobs()
+  const locale = i18n.language.startsWith('vi') ? 'vi-VN' : 'en-US'
 
   const handleExport = () => {
     if (!data?.jobs) return
 
     const csv = [
-      ['Job Title', 'Category', 'Location', 'Salary', 'Applicants', 'Status', 'Updated Date'],
+      [
+        t('employer.jobs.table.jobTitle'),
+        t('employer.jobs.table.category'),
+        t('employer.jobs.table.location'),
+        t('employer.jobs.table.salary'),
+        t('employer.jobs.table.applicants'),
+        t('employer.jobs.table.status'),
+        t('employer.jobs.table.updatedDate')
+      ],
       ...data.jobs.map((job) => [
         job.title,
         job.category?.name || '-',
         job.workLocation || '-',
         job.salary || '-',
         job.applicantCount || 0,
-        job.isActive ? 'Open' : 'Paused',
-        new Date(job.updatedDate).toLocaleDateString('en-US')
+        job.isActive ? t('employer.statuses.OPEN') : t('employer.statuses.PAUSED'),
+        new Date(job.updatedDate).toLocaleDateString(locale)
       ])
     ]
       .map((row) => row.map((cell) => `"${cell}"`).join(','))
@@ -41,38 +52,41 @@ const JobsPage = () => {
   }
 
   const actionButtons = (
-    <div className='flex items-center gap-3'>
-      <Button variant='outline' size='sm' onClick={handleExport} className='rounded-lg'>
+    <div className='flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center'>
+      <Button variant='outline' size='sm' onClick={handleExport} className='w-full rounded-lg sm:w-auto'>
         <Download className='h-4 w-4' />
-        Export
+        {t('employer.actions.export')}
       </Button>
-      <Link to='/employer/jobs/create'>
-        <Button size='sm' className='rounded-lg'>
+      <Link to='/employer/jobs/create' className='w-full sm:w-auto'>
+        <Button size='sm' className='w-full rounded-lg sm:w-auto'>
           <Plus className='h-4 w-4' />
-          Add Job
+          {t('employer.jobs.page.addJob')}
         </Button>
       </Link>
     </div>
   )
 
   return (
-    <div className='space-y-6'>
+    <div className='min-w-0 space-y-6'>
       <EmployerPageHeader
-        eyebrow='Jobs management'
-        title='Company Job Postings'
-        description='Monitor open positions, number of applicants, and latest update time.'
+        eyebrow={t('employer.jobs.page.eyebrow')}
+        title={t('employer.jobs.page.title')}
+        description={t('employer.jobs.page.description')}
       />
 
       <EmployerSectionCard
-        title={`All Job Postings${data ? ` • ${data.total}` : ''}`}
-        description='Data sourced directly from the backend employer jobs endpoint.'
+        title={`${t('employer.jobs.page.sectionTitle')}${data ? ` - ${data.total}` : ''}`}
+        description={t('employer.jobs.page.sectionDescription')}
         action={actionButtons}
         contentClassName='space-y-4'
       >
         {isLoading ? (
-          <EmployerEmptyState title='Loading jobs' description='System is fetching the company job postings list.' />
+          <EmployerEmptyState
+            title={t('employer.jobs.page.loadingTitle')}
+            description={t('employer.jobs.page.loadingDescription')}
+          />
         ) : null}
-        {error ? <EmployerEmptyState title='Failed to load jobs' description={error} /> : null}
+        {error ? <EmployerEmptyState title={t('employer.jobs.page.failedTitle')} description={error} /> : null}
         {data ? <EmployerJobList jobs={data.jobs} /> : null}
       </EmployerSectionCard>
     </div>

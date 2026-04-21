@@ -3,6 +3,7 @@ import './App.css'
 import { AppRoutes } from './routes/AppRoutes'
 import ChatWidget from './components/chatbot/ChatbotWidget'
 import ChatWidgetToggle from './components/chatbot/ChatbotWidgetToggle'
+import { ScrollToTop } from './hooks/useScrollToTop'
 
 const ChatOverlay = () => {
   const { pathname } = useLocation()
@@ -33,6 +34,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AppRoutes />
       <ChatOverlay />
     </BrowserRouter>

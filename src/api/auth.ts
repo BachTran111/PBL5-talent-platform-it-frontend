@@ -45,8 +45,9 @@ export const getMeApi = async (): Promise<User> => {
 }
 
 // logout
-export const logoutApi = async (): Promise<void> => {
-  await axiosInstance.post('auth/logout')
+export const logoutApi = async (refreshToken?: string | null): Promise<void> => {
+  const token = refreshToken ?? localStorage.getItem('refreshToken')
+  await axiosInstance.post('/auth/logout', token ? { refresh_token: token } : {})
 }
 
 // register
@@ -66,28 +67,15 @@ export const googleLoginApi = async (credential: string): Promise<LoginResponse>
 // google callback api - exchange authorization code for app tokens
 export const googleCallbackApi = async (code: string): Promise<LoginResponse> => {
   console.log('[authApi] googleCallbackApi called with code')
-  try {
-    const response = await axiosInstance.post<SocialLoginBackendResponse>('/auth/google/callback', { code })
-    console.log('[authApi] googleCallbackApi response:', response.data)
-    return normalizeSocialLoginResponse(response.data)
-  } catch (error) {
-    const status = (error as { response?: { status?: number } }).response?.status
-
-    if (status === 404) {
-      console.warn('[authApi] /auth/google/callback not found, fallback to /auth/google')
-      const fallbackResponse = await axiosInstance.post<SocialLoginBackendResponse>('/auth/google', { code })
-      console.log('[authApi] googleCallbackApi fallback response:', fallbackResponse.data)
-      return normalizeSocialLoginResponse(fallbackResponse.data)
-    }
-
-    throw error
-  }
+  const response = await axiosInstance.post<SocialLoginBackendResponse>('/auth/google/callback', { code })
+  console.log('[authApi] googleCallbackApi response:', response.data)
+  return normalizeSocialLoginResponse(response.data)
 }
 
-// github login api - send access token
-export const githubLoginApi = async (accessToken: string): Promise<LoginResponse> => {
-  console.log('[authApi] githubLoginApi called with accessToken')
-  const response = await axiosInstance.post<SocialLoginBackendResponse>('/auth/github', { accessToken })
+// github login api - send authorization code
+export const githubLoginApi = async (code: string): Promise<LoginResponse> => {
+  console.log('[authApi] githubLoginApi called with code')
+  const response = await axiosInstance.post<SocialLoginBackendResponse>('/auth/github', { code })
   console.log('[authApi] githubLoginApi response:', response.data)
   return normalizeSocialLoginResponse(response.data)
 }
@@ -100,10 +88,10 @@ export const githubCallbackApi = async (code: string): Promise<LoginResponse> =>
   return normalizeSocialLoginResponse(response.data)
 }
 
-// facebook login api - send access token
-export const facebookLoginApi = async (accessToken: string): Promise<LoginResponse> => {
-  console.log('[authApi] facebookLoginApi called with accessToken')
-  const response = await axiosInstance.post<SocialLoginBackendResponse>('/auth/facebook', { accessToken })
+// facebook login api - send authorization code
+export const facebookLoginApi = async (code: string): Promise<LoginResponse> => {
+  console.log('[authApi] facebookLoginApi called with code')
+  const response = await axiosInstance.post<SocialLoginBackendResponse>('/auth/facebook', { code })
   console.log('[authApi] facebookLoginApi response:', response.data)
   return normalizeSocialLoginResponse(response.data)
 }

@@ -1,4 +1,5 @@
 import { AlertCircle, BriefcaseBusiness, RefreshCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { PrimaryButton } from '@/components/ui/Buttons'
 
@@ -10,6 +11,7 @@ type JobDetailStateProps = {
 }
 
 const JobDetailState = ({ title, description, tone = 'empty', onRetry }: JobDetailStateProps) => {
+  const { t } = useTranslation()
   const Icon = tone === 'error' ? AlertCircle : BriefcaseBusiness
 
   return (
@@ -25,14 +27,14 @@ const JobDetailState = ({ title, description, tone = 'empty', onRetry }: JobDeta
         {onRetry ? (
           <PrimaryButton onClick={onRetry} className='rounded-2xl px-6'>
             <RefreshCcw className='mr-2 h-4 w-4' />
-            Try Again
+            {t('jobDetail.tryAgain')}
           </PrimaryButton>
         ) : null}
         <Link
           to='/jobs'
           className='inline-flex items-center justify-center rounded-2xl border border-violet-300 bg-white px-6 py-3 text-sm font-semibold text-violet-700 shadow-[0_8px_24px_rgba(15,23,42,0.04)] transition duration-300 hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 focus-visible:ring-offset-2'
         >
-          Back to Jobs
+          {t('jobDetail.backToJobs')}
         </Link>
       </div>
     </div>
